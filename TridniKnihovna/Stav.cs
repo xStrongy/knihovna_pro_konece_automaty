@@ -4,25 +4,22 @@ using System.Text;
 
 namespace TridniKnihovna
 {
+    public enum TypStavu {
+        Pocatecni,
+        Konecny,
+        Normalni
+    }
     public class Stav
     {
-        private int oznaceni;
+        public int Oznaceni { get; set; }
+        public TypStavu Typ{ get; set; }
 
-        public Stav() {
-            this.oznaceni = 0;
-
-        }
-
-        public Stav(int oznaceni, bool vychozi, bool konecny)
+        public Stav(int oznaceni, TypStavu typ)
         {
-            this.oznaceni = oznaceni;
-
+            this.Oznaceni = oznaceni;
+            this.Typ = typ;
         }
 
-        public void set_oznaceni(int oznaceni)
-        {
-            this.oznaceni = oznaceni;
-        }
 
     }
 }
