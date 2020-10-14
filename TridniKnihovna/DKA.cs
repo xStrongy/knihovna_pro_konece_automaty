@@ -6,17 +6,17 @@ namespace TridniKnihovna
 {
     public class DKA
     {
-        public string Nazev { get; set; }
-        private List<Stav> stavy;                       // list stavů
-        private List<Prechod> prechody;                 // list prechodu
-        private List<char> tokeny;                      // list znaku, ktere bude automat prijimat (napr.: a,b ... atd)
+        public string Name { get; set; }
+        private List<State> states;                       // list stavů
+        private List<Transition> transitions;                 // list prechodu
+        private List<char> tokens;                      // list znaku, ktere bude automat prijimat (napr.: a,b ... atd)
         public int AktualniStav { get; private set; }
         public DKA(string nazev, List<char> tokeny)
         {
-            this.Nazev = nazev;
-            this.tokeny = tokeny;
-            this.prechody = new List<Prechod>();
-            this.stavy = new List<Stav>();
+            this.Name = nazev;
+            this.tokens = tokeny;
+            this.transitions = new List<Transition>();
+            this.states = new List<State>();
         }
     }
 }
