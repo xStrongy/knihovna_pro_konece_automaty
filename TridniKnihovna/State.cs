@@ -15,7 +15,7 @@ namespace TridniKnihovna
         public string Name { get; set; }
         public TypeOfState Type{ get; set; }
 
-        public State(int id,string name, TypeOfState type)
+        public State(uint id,string name, TypeOfState type)
         {
             this.Id = id;
             this.Name = name;

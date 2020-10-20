@@ -4,8 +4,8 @@ using System.Text;
 
 namespace TridniKnihovna
 {
-    class RegEx
+    public class RegEx
     {
-
+        public string Expression { get; set; }
     }
 }

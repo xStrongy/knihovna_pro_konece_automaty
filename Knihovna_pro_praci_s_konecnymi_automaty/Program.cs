@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TridniKnihovna;
 
 namespace Knihovna_pro_praci_s_konecnymi_automaty
@@ -7,7 +8,15 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Ahoj Svete!");
+            List<char> tokens = new List<char>();
+            tokens.Add('a');
+            tokens.Add('b');
+            RegEx ex = new RegEx();
+            ex.Expression = "((a+b).b)*";
+            DKA Automata = new DKA("Q1", tokens);
+            Automata.useRegEx(ex);
+            Builder builder = new Builder(Automata);
+            builder.Create();
         }
     }
 }
