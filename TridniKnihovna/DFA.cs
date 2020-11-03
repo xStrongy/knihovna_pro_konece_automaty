@@ -16,6 +16,7 @@ namespace TridniKnihovna
         {
             this.Name = nazev;
             this.tokens = tokens;
+            tokens.Add('e');
             this.transitions = new List<Transition>();
             this.states = new List<State>();
             this.AktualniStav = 1;
