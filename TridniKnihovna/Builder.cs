@@ -7,8 +7,8 @@ namespace TridniKnihovna
     public class Builder
     {
 
-        private DKA Automata;
-        public Builder(DKA automata)
+        private DFA Automata;
+        public Builder(DFA automata)
         { this.Automata = automata; }
         
         public void Create()
