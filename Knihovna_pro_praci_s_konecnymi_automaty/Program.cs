@@ -8,7 +8,7 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
     {
         static void Main(string[] args)
         {
-            String input = "aaaaabbababbbbbbb!bbbbbbbbbbbbbbbbba";
+            String input = "abbbbbbbbbbbbbbbbbbbbbbbbbbbb";
             List<char> tokens = new List<char>();
             tokens.Add('a');
             tokens.Add('b');

@@ -27,6 +27,7 @@ namespace TridniKnihovna
             this.ex = ex;
         }
 
+        //funkce pro vytvoření stavů
         public void createState(int id, TypeOfState state)
         {
             State a = new State(id, state);
@@ -35,6 +36,7 @@ namespace TridniKnihovna
             states.Add(a);
         }
 
+        //funkce pro vytvoření přechodů a stavů
         public void addTransition(int start, char token, int end)
         {
             bool exists = false;
@@ -66,6 +68,8 @@ namespace TridniKnihovna
             
         }
 
+
+        //funkce pro nastavení typu stavu
         public void setTypeOfState(int id, TypeOfState type)
         {
             foreach (State s in states)
@@ -75,6 +79,7 @@ namespace TridniKnihovna
             }
         }
 
+        //funkce která vrací bool hodnotu podle toho, zda daný automat přijímá input nebo ne
         public bool accepts(string input)
         {
             if (input == "" && states[0].Type == TypeOfState.End)
@@ -102,11 +107,14 @@ namespace TridniKnihovna
           return false;
         }
 
+
+        //funkce pro výpis počtu stavů
         public void countOfStates()
         {
             Console.WriteLine("Je vytvoreno " + states.Count + " stavů!");
         }
 
+        //funkce která určuje, zda vstupní input je validní
         public bool isValidInput(string input)
         {
             for (int i = 0; i < input.Length; i++)
