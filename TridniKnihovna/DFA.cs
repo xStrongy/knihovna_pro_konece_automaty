@@ -4,14 +4,9 @@ using System.Text;
 
 namespace TridniKnihovna
 {
-    public class DFA
+    public class DFA : FA
     {
-        public string Name { get; set; }
-        private List<State> states;                       // list stavů
-        private List<Transition> transitions;             // list prechodu
-        private List<char> tokens;                        // list znaku, ktere bude automat prijimat (napr.: a,b ... atd)
-        public RegEx ex { get; private set; }
-        public int AktualniStav { get; private set; }
+       
         public DFA(string nazev, List<char> tokens)
         {
             this.Name = nazev;
@@ -27,14 +22,7 @@ namespace TridniKnihovna
             this.ex = ex;
         }
 
-        //funkce pro vytvoření stavů
-        public void createState(int id, TypeOfState state)
-        {
-            State a = new State(id, state);
-            if (states.Count == 0)
-                a.Type = TypeOfState.Start;
-            states.Add(a);
-        }
+    
 
         //funkce pro vytvoření přechodů a stavů
         public void addTransition(int start, char token, int end)
@@ -68,17 +56,6 @@ namespace TridniKnihovna
             
         }
 
-
-        //funkce pro nastavení typu stavu
-        public void setTypeOfState(int id, TypeOfState type)
-        {
-            foreach (State s in states)
-            {
-                if (s.Id == id)
-                    s.Type = type;
-            }
-        }
-
         //funkce která vrací bool hodnotu podle toho, zda daný automat přijímá input nebo ne
         public bool accepts(string input)
         {
@@ -107,23 +84,6 @@ namespace TridniKnihovna
           return false;
         }
 
-
-        //funkce pro výpis počtu stavů
-        public void countOfStates()
-        {
-            Console.WriteLine("Je vytvoreno " + states.Count + " stavů!");
-        }
-
-        //funkce která určuje, zda vstupní input je validní
-        public bool isValidInput(string input)
-        {
-            for (int i = 0; i < input.Length; i++)
-            {
-                if (!(tokens.Contains(input[i])))
-                    return false;
-            }
-            return true;
-        }
     }
 
 }
