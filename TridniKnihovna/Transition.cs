@@ -8,7 +8,7 @@ namespace TridniKnihovna
     {
         public int StartState { get; set; }
         public char Token { get; set; }
-        public int EndState{get;set;}
+        public int? EndState{get;set;}
 
         public Transition(int startState, char token, int endState)
         {

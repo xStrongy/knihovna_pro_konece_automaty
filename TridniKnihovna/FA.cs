@@ -11,7 +11,7 @@ namespace TridniKnihovna
         protected List<Transition> transitions;             // list prechodu
         protected List<char> tokens;                        // list znaku, ktere bude automat prijimat (napr.: a,b ... atd)
         public RegEx ex { get; set; }
-        protected int AktualniStav { get; set; }
+        
 
 
         //funkce pro vytvoření stavů
@@ -49,6 +49,43 @@ namespace TridniKnihovna
                     return false;
             }
             return true;
+        }
+
+        public void useRegEx(RegEx ex)
+        {
+            this.ex = ex;
+        }
+
+        //funkce pro vytvoření přechodů a stavů
+        public void addTransition(int start, char token, int end)
+        {
+            bool exists = false;
+            for (int i = 0; i < states.Count; i++)
+            {
+                if (states[i].Id == end)
+                    exists = true;
+            }
+
+            if (exists == false)
+            {
+                State a = new State(end, TypeOfState.Normal);
+                states.Add(a);
+            }
+            exists = false;
+
+            for (int i = 0; i < states.Count; i++)
+            {
+                if (states[i].Id == start)
+                    exists = true;
+            }
+
+            if (exists == false)
+            {
+                State a = new State(start, TypeOfState.Normal);
+            }
+            Transition transition = new Transition(start, token, end);
+            transitions.Add(transition);
+
         }
     }
 }
