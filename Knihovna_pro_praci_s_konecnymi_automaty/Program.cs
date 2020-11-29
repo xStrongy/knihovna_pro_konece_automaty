@@ -58,6 +58,7 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
             Automata2.addTransition(4, 'b', 5);
             Automata2.addTransition(4, 'b', 3);
             Automata2.addTransition(5, 'b', 5);
+            Automata2.setTypeOfState(3, TypeOfState.Start);
             Automata2.countOfStates();
             Automata2.accepts(input);
             if (Automata2.accepts(input) == true)

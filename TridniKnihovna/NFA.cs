@@ -21,7 +21,11 @@ namespace TridniKnihovna
         public bool accepts(string input)
         {
             List<State> helpList = new List<State>();
-            this.currentStates.Add(states.Find(x => x.Id == 1));
+            foreach(State s in states)
+            {
+                if (s.Type == TypeOfState.Start)
+                    currentStates.Add(s);
+            }
 
             if (input == "" && states[0].Type == TypeOfState.End)
                 return true;
@@ -50,9 +54,9 @@ namespace TridniKnihovna
                         }
                     }
                     currentStates.Clear();
-                    for(int j = 0;j<helpList.Count ;j++)
+                    foreach(State s in helpList)
                     {
-                        currentStates.Add(helpList.Find(x => x.Id == j));
+                        currentStates.Add(s);
                     }
                 }
             }
