@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace TridniKnihovna
 {
     public class DFA : FA
     {
         private int? currentState {get; set;}
+        public DFA() { }
         public DFA(string nazev, List<char> tokens)
         {
             this.Name = nazev;

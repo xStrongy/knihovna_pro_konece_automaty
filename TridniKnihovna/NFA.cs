@@ -9,6 +9,7 @@ namespace TridniKnihovna
     public class NFA : FA
     {
         List<State> currentStates = new List<State>();
+        public NFA() { }
         public NFA(string nazev, List<char> tokens)
         {
             this.Name = nazev;

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace TridniKnihovna
 {
@@ -87,5 +89,7 @@ namespace TridniKnihovna
             transitions.Add(transition);
 
         }
+
+        
     }
 }

@@ -8,6 +8,7 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
     {
         static void Main(string[] args)
         {
+            FileManager fileManager = new FileManager();
             String input = "ababb";
             List<char> tokens = new List<char>();
             tokens.Add('a');
@@ -34,6 +35,9 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
                 Automata.setTypeOfState(4, TypeOfState.End);
                 Automata.setTypeOfState(5, TypeOfState.End);
                 Automata.countOfStates();
+                fileManager.saveToJson(Automata);
+                fileManager.loadDFAFromJson("Q1");
+              
 
                 if (Automata.accepts(input) == true)
                     Console.WriteLine("Zadany parametr automat prijima!");
@@ -60,6 +64,7 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
             Automata2.addTransition(5, 'b', 5);
             Automata2.setTypeOfState(3, TypeOfState.Start);
             Automata2.countOfStates();
+            fileManager.saveToJson(Automata2);
             Automata2.accepts(input);
             if (Automata2.accepts(input) == true)
                 Console.WriteLine("Zadany parametr automat prijima!");
