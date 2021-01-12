@@ -9,11 +9,14 @@ namespace TridniKnihovna
     public class FA
     {
         public string Name { get; set; }
+        [JsonProperty]
         protected List<State> states;                       // list stavů
+        [JsonProperty]
         protected List<Transition> transitions;             // list prechodu
+        [JsonProperty]
         protected List<char> tokens;                        // list znaku, ktere bude automat prijimat (napr.: a,b ... atd)
         public RegEx ex { get; set; }
-        
+        protected const string dataPath = @"C:\Users\Strongy\source\repos\Knihovna_pro_praci_s_konecnymi_automaty\saved\";
 
 
         //funkce pro vytvoření stavů
@@ -90,6 +93,5 @@ namespace TridniKnihovna
 
         }
 
-        
     }
 }

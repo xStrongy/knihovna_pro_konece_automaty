@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Transactions;
+using Newtonsoft.Json;
 
 namespace TridniKnihovna
 {
@@ -94,5 +96,24 @@ namespace TridniKnihovna
                 }
             }
         }
+
+        public void saveToJson()
+        {
+            string context = JsonConvert.SerializeObject(this);
+            File.WriteAllText(dataPath + "nfa\\" + this.Name + ".json", context);
+        }
+
+        public NFA loadFromJson(string name)
+        {
+            if (!(File.Exists(dataPath + "nfa\\" + name + ".json")))
+            {
+                Console.WriteLine("Soubor neexistuje");
+                return null;
+            }
+
+            NFA nfa = JsonConvert.DeserializeObject<NFA>(File.ReadAllText(dataPath + "nfa\\" + name + ".json"));
+            return nfa;
+        }
+
     }
 }
