@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Transactions;
 using Newtonsoft.Json;
@@ -11,7 +12,6 @@ namespace TridniKnihovna
     public class NFA : FA
     {
         List<State> currentStates = new List<State>();
-        public NFA() { }
         public NFA(string nazev, List<char> tokens)
         {
             this.Name = nazev;
@@ -21,7 +21,7 @@ namespace TridniKnihovna
             this.states = new List<State>();
         }
 
-        public bool accepts(string input)
+       public bool accepts(string input)
         {
             List<State> helpList = new List<State>();
             foreach(State s in states)
@@ -37,9 +37,14 @@ namespace TridniKnihovna
 
             for (int i = 0; i < input.Length ;i++)
             {
+                foreach(State s in currentStates)
+                {
+                   Console.WriteLine("Stav: " + s.Id + " ");
+                }
+                Console.WriteLine();
                 if(hasEpsilonTransition(currentStates)==true)
                 {
-                    goThroughEpsilon(currentStates);
+                    currentStates = goThroughEpsilon(currentStates);
                     i--;
                 }
                 else
@@ -52,6 +57,8 @@ namespace TridniKnihovna
                             {
                                 if (t.EndState == null)
                                     continue;
+                                if (helpList.Contains(states.Find(x => x.Id == t.EndState)) == true)
+                                    continue;
                                 helpList.Add(states.Find(x => x.Id == t.EndState));
                             }
                         }
@@ -61,6 +68,7 @@ namespace TridniKnihovna
                     {
                         currentStates.Add(s);
                     }
+                    helpList.Clear();
                 }
             }
 
@@ -84,7 +92,7 @@ namespace TridniKnihovna
             }
             return false;
         }
-        private void goThroughEpsilon(List<State> list)
+        private List<State> goThroughEpsilon(List<State> list)
         {
             List<State> helpList = new List<State>();
             foreach(State s in list)
@@ -95,6 +103,8 @@ namespace TridniKnihovna
                         helpList.Add(states.Find(x => x.Id == t.EndState));
                 }
             }
+
+            return helpList;
         }
 
         public void saveToJson()

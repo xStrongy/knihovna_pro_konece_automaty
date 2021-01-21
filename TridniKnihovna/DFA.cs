@@ -10,12 +10,10 @@ namespace TridniKnihovna
     public class DFA : FA
     {
         private int? currentState {get; set;}
-        public DFA() { }
         public DFA(string nazev, List<char> tokens)
         {
             this.Name = nazev;
             this.tokens = tokens;
-            tokens.Add('e');
             this.transitions = new List<Transition>();
             this.states = new List<State>();
             this.currentState = 1;
@@ -69,7 +67,7 @@ namespace TridniKnihovna
         public void saveToJson()
         {
             string context = JsonConvert.SerializeObject(this);
-            Console.WriteLine(context);
+            //Console.WriteLine(context);
             File.WriteAllText(dataPath + "dfa\\" + this.Name + ".json", context);
         }
 
