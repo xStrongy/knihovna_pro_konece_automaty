@@ -8,7 +8,7 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
     {
         static void Main(string[] args)
         {
-            String input = "ababba";
+            String input = "ababb";
             List<char> tokens = new List<char>();
             tokens.Add('a');
             tokens.Add('b');
@@ -34,7 +34,6 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
                 Automata.setTypeOfState(5, TypeOfState.End);
                 Automata.countOfStates();
                 Automata.saveToJson();
-                DFA tempAutomata = Automata.loadFromJson("Q1");
               
 
                 if (Automata.accepts(input) == true)
@@ -49,7 +48,7 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
 
 
             Console.WriteLine("********************");
-            Automata2.createState(1, TypeOfState.Start);
+            Automata2.createState(1, TypeOfState.StartAndEnd);
             Automata2.addTransition(1, 'a', 2);
             Automata2.addTransition(1, 'a', 3);
             Automata2.addTransition(1, 'b', 1);

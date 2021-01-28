@@ -38,12 +38,17 @@ namespace TridniKnihovna
 
             for (int i = 0; i < input.Length; i++)
             {
+                foreach(uint test in currentStateIds)
+                {
+                    Console.Write(test + " ");
+                }
+                Console.WriteLine();
                 do
                 {
                     helpList = hasEpsylonTransition(currentStateIds);
                     if(helpList.Count != 0)
                     {
-                        goThroughEpsylonTransition(helpList);
+                        helpList = goThroughEpsylonTransition(helpList);
                     }
                 } while (helpList.Count != 0);
                 
@@ -51,21 +56,25 @@ namespace TridniKnihovna
                 {
                     helpCurrentStateIdList.Add(index);
                 }
-
-                foreach(uint index in helpCurrentStateIdList)
+                currentStateIds.Clear();
+                foreach (uint index in helpCurrentStateIdList)
                 {
-                    currentStateIds.Remove(index);
                     sortedHelpList = dictionary[index];
                     if(sortedHelpList.ContainsKey(input[i]) == false)
                     {
-                        break;
+                        continue;
                     }
                     helpStateIdList = sortedHelpList[input[i]];
                     foreach (uint newState in helpStateIdList)
                     {
+                        if(currentStateIds.Contains(newState) == true)
+                        {
+                            continue;
+                        }
                         currentStateIds.Add(newState);
                     }
                 }
+                helpCurrentStateIdList.Clear();
             }
 
             foreach(uint i in currentStateIds)
@@ -76,11 +85,17 @@ namespace TridniKnihovna
             return false;
         }
 
-        private void goThroughEpsylonTransition(List<uint> helpList)
+        private List<uint> goThroughEpsylonTransition(List<uint> helpList)
         {
+            List<uint> tempHelpList = new List<uint>();
+            foreach(uint i in helpList)
+            {
+                tempHelpList.Add(i);
+            }
 
             foreach (uint i in helpList)
             {
+                tempHelpList.Remove(i);
                 currentStateIds.Remove(i);
                 sortedHelpList = dictionary[i];
                 helpStateIdList = sortedHelpList['E'];
@@ -89,6 +104,7 @@ namespace TridniKnihovna
                     currentStateIds.Add(index);
                 }
             }
+            return tempHelpList;
         }
 
         private List<uint> hasEpsylonTransition(List<uint> currentStateIds)

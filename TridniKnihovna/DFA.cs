@@ -53,6 +53,8 @@ namespace TridniKnihovna
                 currentStateId = tempList[input[i]];
             }
 
+            Console.WriteLine(currentStateId);
+
             if (states.Find(x => x.Id == currentStateId).Type == TypeOfState.End || states.Find(x => x.Id == currentStateId).Type == TypeOfState.StartAndEnd)
                 return true;
             else

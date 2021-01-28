@@ -25,8 +25,6 @@ namespace TridniKnihovna
         public void createState(uint id, TypeOfState state)
         {
             State a = new State(id, state);
-            if (states.Count == 0)
-                a.Type = TypeOfState.Start;
             states.Add(a);
         }
 
