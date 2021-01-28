@@ -11,100 +11,100 @@ namespace TridniKnihovna
 {
     public class NFA : FA
     {
-        List<State> currentStates = new List<State>();
+        [JsonProperty]
+        private IDictionary<uint, SortedList<char, List<uint>>> dictionary = new Dictionary<uint, SortedList<char, List<uint>>>();
+        List<uint> currentStateIds = new List<uint>();
+        SortedList<char, List<uint>> sortedHelpList = new SortedList<char, List<uint>>();
+        List<uint> helpStateIdList = new List<uint>();
+        List<uint> helpCurrentStateIdList = new List<uint>();
         public NFA(string nazev, List<char> tokens)
         {
             this.Name = nazev;
             this.tokens = tokens;
-            tokens.Add('e');
+            tokens.Add('E');
             this.transitions = new List<Transition>();
             this.states = new List<State>();
         }
-
-       public bool accepts(string input)
+        public bool accepts(string input)
         {
-            List<State> helpList = new List<State>();
-            foreach(State s in states)
+            List<uint> helpList = new List<uint>();
+            foreach (State s in states)
             {
-                if (s.Type == TypeOfState.Start)
-                    currentStates.Add(s);
-            }
-
-            if (input == "" && states[0].Type == TypeOfState.End)
-                return true;
-            if (input == "" && states[0].Type != TypeOfState.End)
-                return false;
-
-            for (int i = 0; i < input.Length ;i++)
-            {
-                foreach(State s in currentStates)
+                if (s.Type == TypeOfState.Start || s.Type == TypeOfState.StartAndEnd)
                 {
-                   Console.WriteLine("Stav: " + s.Id + " ");
-                }
-                Console.WriteLine();
-                if(hasEpsilonTransition(currentStates)==true)
-                {
-                    currentStates = goThroughEpsilon(currentStates);
-                    i--;
-                }
-                else
-                {
-                    foreach(State s in currentStates)
-                    {
-                        foreach(Transition t in transitions)
-                        {
-                            if(t.StartState == s.Id && t.Token == input[i])
-                            {
-                                if (t.EndState == null)
-                                    continue;
-                                if (helpList.Contains(states.Find(x => x.Id == t.EndState)) == true)
-                                    continue;
-                                helpList.Add(states.Find(x => x.Id == t.EndState));
-                            }
-                        }
-                    }
-                    currentStates.Clear();
-                    foreach(State s in helpList)
-                    {
-                        currentStates.Add(s);
-                    }
-                    helpList.Clear();
+                    currentStateIds.Add(s.Id);
                 }
             }
 
-            foreach(State s in currentStates)
+            for (int i = 0; i < input.Length; i++)
             {
-                if (s.Type == TypeOfState.End)
+                do
+                {
+                    helpList = hasEpsylonTransition(currentStateIds);
+                    if(helpList.Count != 0)
+                    {
+                        goThroughEpsylonTransition(helpList);
+                    }
+                } while (helpList.Count != 0);
+                
+                foreach(uint index in currentStateIds)
+                {
+                    helpCurrentStateIdList.Add(index);
+                }
+
+                foreach(uint index in helpCurrentStateIdList)
+                {
+                    currentStateIds.Remove(index);
+                    sortedHelpList = dictionary[index];
+                    if(sortedHelpList.ContainsKey(input[i]) == false)
+                    {
+                        break;
+                    }
+                    helpStateIdList = sortedHelpList[input[i]];
+                    foreach (uint newState in helpStateIdList)
+                    {
+                        currentStateIds.Add(newState);
+                    }
+                }
+            }
+
+            foreach(uint i in currentStateIds)
+            {
+                if (states.Find(x => x.Id == i).Type == TypeOfState.End || states.Find(x => x.Id == i).Type == TypeOfState.StartAndEnd)
                     return true;
             }
             return false;
         }
 
-        private bool hasEpsilonTransition(List<State> list)
+        private void goThroughEpsylonTransition(List<uint> helpList)
         {
-            foreach(State s in list)
+
+            foreach (uint i in helpList)
             {
-                foreach(Transition t in transitions)
+                currentStateIds.Remove(i);
+                sortedHelpList = dictionary[i];
+                helpStateIdList = sortedHelpList['E'];
+                foreach(uint index in helpStateIdList)
                 {
-                    if (t.Token == 'e' && t.StartState == s.Id)
-                        return true;
+                    currentStateIds.Add(index);
                 }
             }
-            return false;
         }
-        private List<State> goThroughEpsilon(List<State> list)
+
+        private List<uint> hasEpsylonTransition(List<uint> currentStateIds)
         {
-            List<State> helpList = new List<State>();
-            foreach(State s in list)
+            List<uint> epsylonTransitionStateId = new List<uint>();
+            SortedList<char, List<uint>> helpSortedList = new SortedList<char, List<uint>>();
+            foreach(uint i in currentStateIds)
             {
-                foreach(Transition t in transitions)
+                helpSortedList = dictionary[i];
+                if(helpSortedList.ContainsKey('E'))
                 {
-                    if (t.StartState == s.Id && t.Token == 'e')
-                        helpList.Add(states.Find(x => x.Id == t.EndState));
+                    epsylonTransitionStateId.Add(i);
                 }
             }
 
-            return helpList;
+            return epsylonTransitionStateId;
         }
 
         public void saveToJson()
@@ -123,6 +123,65 @@ namespace TridniKnihovna
 
             NFA nfa = JsonConvert.DeserializeObject<NFA>(File.ReadAllText(dataPath + "nfa\\" + name + ".json"));
             return nfa;
+        }
+
+        //funkce pro vytvoření přechodů a stavů
+        public void addTransition(uint start, char token, uint end)
+        {
+            SortedList<char, List<uint>> tempList = new SortedList<char, List<uint>>();
+            List<uint> tempIdList = new List<uint>();
+            bool exists = false;
+            for (int i = 0; i < states.Count; i++)
+            {
+                if (states[i].Id == end)
+                    exists = true;
+            }
+
+            if (exists == false)
+            {
+                State a = new State(end, TypeOfState.Normal);
+                states.Add(a);
+            }
+            exists = false;
+
+            for (int i = 0; i < states.Count; i++)
+            {
+                if (states[i].Id == start)
+                    exists = true;
+            }
+
+            if (exists == false)
+            {
+                State a = new State(start, TypeOfState.Normal);
+            }
+            Transition transition = new Transition(start, token, end);
+            if (dictionary.ContainsKey(start) == false)
+            {
+                tempIdList.Add(end);
+                tempList.Add(token, tempIdList);
+            }
+            else
+            {
+                tempList = dictionary[start];
+                dictionary.Remove(start);
+                if (tempList.ContainsKey(token) == false)
+                {
+                    tempIdList = new List<uint>();
+                    tempIdList.Add(end);
+                    tempList.Add(token, tempIdList);
+                }
+                else
+                {
+                    tempIdList = tempList[token];
+                    tempList.Remove(token);
+                    tempIdList.Add(end);
+                    tempList.Add(token, tempIdList);
+                }
+            }
+            dictionary.Add(start, tempList);
+
+            transitions.Add(transition);
+
         }
 
     }

@@ -9,14 +9,16 @@ namespace TridniKnihovna
 {
     public class DFA : FA
     {
-        private int? currentState {get; set;}
+        [JsonProperty]
+        private IDictionary<uint, SortedList<char, uint>> dictionary = new Dictionary<uint, SortedList<char, uint>>();
+        private uint currentStateId;
         public DFA(string nazev, List<char> tokens)
         {
             this.Name = nazev;
             this.tokens = tokens;
             this.transitions = new List<Transition>();
             this.states = new List<State>();
-            this.currentState = 1;
+            this.currentStateId = 0;
         }
 
 
@@ -25,31 +27,36 @@ namespace TridniKnihovna
         //funkce která vrací bool hodnotu podle toho, zda daný automat přijímá input nebo ne
         public bool accepts(string input)
         {
-            if (input == "" && states[0].Type == TypeOfState.End)
-                return true;
-            if (input == "" && states[0].Type != TypeOfState.End)
-                return false;
-
-            for (int i = 0; i < input.Length; i++)
+            foreach(State s in states)
             {
-                foreach (Transition t in transitions)
+                if(s.Type == TypeOfState.Start || s.Type == TypeOfState.StartAndEnd)
                 {
-                    if (t.StartState == currentState && input[i] == t.Token)
-                    {
-                        this.currentState = t.EndState;
-                        break;
-                    }
+                    currentStateId = s.Id;
+                    break;
                 }
             }
 
-                foreach (State s in states)
-                {
-                    if (s.Id == currentState && s.Type == TypeOfState.End)
-                        return true;
-                }
-                return false;
-            
+            if (input.Equals("") && (states.Find(x => x.Id == currentStateId).Type == TypeOfState.End || states.Find(x => x.Id == currentStateId).Type == TypeOfState.StartAndEnd))
+            {
+                return true;
+            }
 
+            if (input.Equals("") && (states.Find(x => x.Id == currentStateId).Type != TypeOfState.End && states.Find(x => x.Id == currentStateId).Type != TypeOfState.StartAndEnd))
+            {
+                return false; 
+            }
+                
+
+           for (int i = 0 ; i < input.Length ;i++ )
+            {
+                SortedList<char, uint> tempList = dictionary[currentStateId];
+                currentStateId = tempList[input[i]];
+            }
+
+            if (states.Find(x => x.Id == currentStateId).Type == TypeOfState.End || states.Find(x => x.Id == currentStateId).Type == TypeOfState.StartAndEnd)
+                return true;
+            else
+                return false;
         }
 
         public DFA loadFromJson(string name)
@@ -69,6 +76,50 @@ namespace TridniKnihovna
             string context = JsonConvert.SerializeObject(this);
             //Console.WriteLine(context);
             File.WriteAllText(dataPath + "dfa\\" + this.Name + ".json", context);
+        }
+
+        public void addTransition(uint start, char token, uint end)
+        {
+            SortedList<char, uint> tempList = new SortedList<char, uint>();
+            bool exists = false;
+            for (int i = 0; i < states.Count; i++)
+            {
+                if (states[i].Id == end)
+                    exists = true;
+            }
+
+            if (exists == false)
+            {
+                State a = new State(end, TypeOfState.Normal);
+                states.Add(a);
+            }
+            exists = false;
+
+            for (int i = 0; i < states.Count; i++)
+            {
+                if (states[i].Id == start)
+                    exists = true;
+            }
+
+            if (exists == false)
+            {
+                State a = new State(start, TypeOfState.Normal);
+            }
+            Transition transition = new Transition(start, token, end);
+            if (dictionary.ContainsKey(start) == false)
+            {
+                tempList.Add(token, end);
+            }
+            else
+            {
+                tempList = dictionary[start];
+                dictionary.Remove(start);
+                tempList.Add(token, end);
+            }
+            dictionary.Add(start, tempList);
+                
+            transitions.Add(transition);
+
         }
 
     }

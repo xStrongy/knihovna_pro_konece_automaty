@@ -8,7 +8,7 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
     {
         static void Main(string[] args)
         {
-            String input = "ababb";
+            String input = "ababba";
             List<char> tokens = new List<char>();
             tokens.Add('a');
             tokens.Add('b');
@@ -19,7 +19,7 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
             //Automata.useRegEx(ex);
             if (Automata.isValidInput(input) == true)
             {
-                Automata.createState(1, TypeOfState.Start);
+                Automata.createState(1, TypeOfState.StartAndEnd);
                 Automata.addTransition(1, 'a', 2);
                 Automata.addTransition(1, 'b', 1);
                 Automata.addTransition(2, 'a', 4);
@@ -30,7 +30,6 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
                 Automata.addTransition(4, 'b', 3);
                 Automata.addTransition(5, 'a', 4);
                 Automata.addTransition(5, 'b', 5);
-                Automata.setTypeOfState(1, TypeOfState.End);
                 Automata.setTypeOfState(4, TypeOfState.End);
                 Automata.setTypeOfState(5, TypeOfState.End);
                 Automata.countOfStates();
@@ -59,7 +58,7 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
             Automata2.addTransition(3, 'b', 4);
             Automata2.addTransition(4, 'b', 5);
             Automata2.addTransition(4, 'b', 3);
-            Automata2.addTransition(4, 'e', 1);
+            Automata2.addTransition(4, 'E', 1);
             Automata2.addTransition(5, 'b', 5);
             Automata2.setTypeOfState(3, TypeOfState.Start);
             Automata2.setTypeOfState(5, TypeOfState.End);

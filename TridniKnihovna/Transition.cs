@@ -6,11 +6,11 @@ namespace TridniKnihovna
 {
     public class Transition
     {
-        public int StartState { get; set; }
+        public uint StartState { get; set; }
         public char Token { get; set; }
-        public int? EndState{get;set;}
+        public uint? EndState{get;set;}
 
-        public Transition(int startState, char token, int endState)
+        public Transition(uint startState, char token, uint endState)
         {
             this.StartState = startState;
             this.Token = token;

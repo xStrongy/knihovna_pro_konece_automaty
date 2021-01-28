@@ -7,14 +7,15 @@ namespace TridniKnihovna
     public enum TypeOfState {
         Start,
         End,
-        Normal
+        Normal,
+        StartAndEnd
     }
     public class State
     {
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; }
         public TypeOfState Type{ get; set; }
-        public State(int id, TypeOfState type)
+        public State(uint id, TypeOfState type)
         {
             this.Id = id;
             this.Type = type;

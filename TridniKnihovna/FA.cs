@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Xml;
 using Newtonsoft.Json;
 
 namespace TridniKnihovna
 {
     public class FA
     {
+        
         public string Name { get; set; }
         [JsonProperty]
         protected List<State> states;                       // list stavů
@@ -20,7 +22,7 @@ namespace TridniKnihovna
 
 
         //funkce pro vytvoření stavů
-        public void createState(int id, TypeOfState state)
+        public void createState(uint id, TypeOfState state)
         {
             State a = new State(id, state);
             if (states.Count == 0)
@@ -29,7 +31,7 @@ namespace TridniKnihovna
         }
 
         //funkce pro nastavení typu stavu
-        public void setTypeOfState(int id, TypeOfState type)
+        public void setTypeOfState(uint id, TypeOfState type)
         {
             foreach (State s in states)
             {
@@ -60,38 +62,6 @@ namespace TridniKnihovna
         {
             this.ex = ex;
         }
-
-        //funkce pro vytvoření přechodů a stavů
-        public void addTransition(int start, char token, int end)
-        {
-            bool exists = false;
-            for (int i = 0; i < states.Count; i++)
-            {
-                if (states[i].Id == end)
-                    exists = true;
-            }
-
-            if (exists == false)
-            {
-                State a = new State(end, TypeOfState.Normal);
-                states.Add(a);
-            }
-            exists = false;
-
-            for (int i = 0; i < states.Count; i++)
-            {
-                if (states[i].Id == start)
-                    exists = true;
-            }
-
-            if (exists == false)
-            {
-                State a = new State(start, TypeOfState.Normal);
-            }
-            Transition transition = new Transition(start, token, end);
-            transitions.Add(transition);
-
-        }
-
+       
     }
 }
