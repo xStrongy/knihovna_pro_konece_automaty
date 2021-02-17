@@ -7,17 +7,32 @@ namespace TridniKnihovna
 {
     public class State
     {
-        public int Id { get; }
-        public string Label { get; }
-        public bool IsInitial { get; }
-        public bool IsFinal { get; }
+        public int Id { get; init; }
 
-        public State(int Id, string Label, bool IsInitial, bool IsFinal)
+        private string mLabel;
+        public bool IsInitial { get; init; }
+        public bool IsAccept { get; init; }
+
+        public string Label
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(mLabel))
+                    return Id.ToString();
+                return mLabel;
+            }
+            init
+            {
+                mLabel = value;
+            }
+        }
+
+        public State(int Id, string Label, bool IsInitial, bool IsAccept)
         {
             this.Id = Id;
             this.Label = Label;
             this.IsInitial = IsInitial;
-            this.IsFinal = IsFinal;
+            this.IsAccept = IsAccept;
         }
 
         public State(XmlReader Reader)
@@ -25,14 +40,14 @@ namespace TridniKnihovna
             this.Id = int.Parse(Reader["Id"]);
             this.Label = Reader["Label"];
             this.IsInitial = bool.Parse(Reader["IsInitial"]);
-            this.IsFinal = bool.Parse(Reader["IsFinal"]);
+            this.IsAccept = bool.Parse(Reader["IsAccept"]);
         }
 
         public bool IsCommonState
         {
             get
             {
-                return !IsInitial && !IsFinal;
+                return !IsInitial && !IsAccept;
             }
         }
 
@@ -42,7 +57,7 @@ namespace TridniKnihovna
             Writer.WriteAttributeString("Id", Id.ToString());
             Writer.WriteAttributeString("Label", Label);        // co se stane s prazdym label
             Writer.WriteAttributeString("IsInitial", IsInitial.ToString());
-            Writer.WriteAttributeString("IsFinal", IsFinal.ToString());
+            Writer.WriteAttributeString("IsAccept", IsAccept.ToString());
             Writer.WriteEndElement();
         }
 
@@ -57,13 +72,18 @@ namespace TridniKnihovna
                 {
                     builder.AppendFormat("label=\"{0}\"", Label);
                 }
-                if (IsFinal)
+                if (IsAccept)
                 {
                     builder.Append("shape = doublecircle");
                 }
                 builder.Append("];");
                 return builder.ToString();
             }
+        }
+
+        public void Report()
+        {
+            Console.WriteLine("({0}, {1}, {2}, {3})", Id, mLabel, IsInitial, IsAccept);
         }
     }
 }

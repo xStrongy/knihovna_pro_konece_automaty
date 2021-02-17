@@ -18,6 +18,7 @@ namespace TridniKnihovna
 			: base(States, Alphabet)
 		{
 			InitialStateIds = new List<int>();
+			EpsilonDeltaFunction = pairs.ToDictionary(p => p.Key, p => p.Value);
 			foreach (DeltaFunctionTriplet dft in Triplets)
 			{
 				List<int> To = new List<int>();
@@ -47,7 +48,6 @@ namespace TridniKnihovna
 				}
 			}
 
-			EpsilonDeltaFunction = pairs.ToDictionary(p => p.Key, p => p.Value);
 		}
 
 		public void Save2Xml(XmlWriter Writer)
@@ -76,7 +76,7 @@ namespace TridniKnihovna
 
 		private void IsValidAutomaton()
 		{
-			if (InitialStateIds.Count == 0 || FinalStates.Count == 0)
+			if (InitialStateIds.Count == 0 || AcceptStates.Count == 0)
 			{
 				throw new NoValidAutomatonException();
 			}
@@ -99,22 +99,30 @@ namespace TridniKnihovna
 				return false;
 			}
 
-			List<int> currenentStateIds = new List<int>();
+			List<int> currentStateIds = new List<int>();
 			foreach(int id in InitialStateIds)
 			{
-				currenentStateIds.Add(id);
+				currentStateIds.Add(id);
 			}
+
+			ExpandInitialOrFinalStatesByEpsilonTransitions(currentStateIds);
 
 			foreach(char c in input)
 			{
-				while(HasEpsilonTransition(currenentStateIds))
+				while(HasEpsilonTransition(currentStateIds))
 				{
-					 GoThroughEpsilon(currenentStateIds);
+					 GoThroughEpsilon(currentStateIds);
 				}
-				currenentStateIds = DoDeltaFunction(currenentStateIds, c);
+				currentStateIds = DoDeltaFunction(currentStateIds, c);
+				if(currentStateIds.Count == 0)
+                {
+					return false;
+                }
 			}
 
-			return FinalStates.Any(x => currenentStateIds.Contains(x.Id));
+			ExpandInitialOrFinalStatesByEpsilonTransitions(currentStateIds);
+
+			return AcceptStates.Any(x => currentStateIds.Contains(x.Id));
 		}
 
 		private List<int> DoDeltaFunction(List<int> currentStates, char by)
@@ -122,6 +130,10 @@ namespace TridniKnihovna
 			List<int> NewCurrentStates = new List<int>();
 			foreach(int id in currentStates)
 			{
+				if(!DeltaFunction.ContainsKey(id))
+                {
+					continue;
+                }
 				SortedList<char, List<int>> EndStates = DeltaFunction[id];
 				if(!EndStates.ContainsKey(by))
 				{
@@ -167,7 +179,6 @@ namespace TridniKnihovna
 				List<int> NewEndStates;
 				if(EpsilonDeltaFunction.ContainsKey(id))
 				{
-					NewEndStates = new List<int>();
 					NewEndStates = EpsilonDeltaFunction[id];
 					currentStateIds.Remove(id);
 					foreach(int item in NewEndStates)
@@ -180,5 +191,121 @@ namespace TridniKnihovna
 				}
 			}
 		}
+
+		private List<int> AddStatesToCurrent(List<int> LastAddedStates,List<int> currentStateIds)
+        {
+			List<int> NewCurrentState = new List<int>();
+
+			foreach(int id in LastAddedStates)
+            {
+				List<int> EndStates;
+				if(EpsilonDeltaFunction.ContainsKey(id))
+                {
+					EndStates = EpsilonDeltaFunction[id];
+					foreach(int item in EndStates)
+                    {
+						if(!currentStateIds.Contains(item))
+                        {
+							NewCurrentState.Add(item);
+							currentStateIds.Add(item);
+                        }
+                    }
+				}
+            }
+
+			return NewCurrentState;
+		}
+
+		private void ExpandInitialOrFinalStatesByEpsilonTransitions(List<int> currentStateIds)
+		{
+			List<int> NewCurrentStates = new List<int>();
+
+			foreach (int id in currentStateIds)
+			{
+				NewCurrentStates.Add(id);
+			}
+
+			while (HasEpsilonTransition(NewCurrentStates))
+			{
+				NewCurrentStates = AddStatesToCurrent(NewCurrentStates, currentStateIds);
+			}
+		}
+
+		public void DeleteUnattainableStates()
+        {
+			List<int> attainableStatesIds = new List<int>();
+			List<int> currentStatesIds = new List<int>();
+
+			foreach(int id in InitialStateIds)
+            {
+				currentStatesIds.Add(id);
+				attainableStatesIds.Add(id);
+			}
+
+			while(currentStatesIds.Count != 0)
+            {
+				currentStatesIds = ExpandAttainableStates(currentStatesIds, attainableStatesIds);
+            }
+
+			Dictionary<int, SortedList<char, List<int>>> NewDeltaFunction = new Dictionary<int, SortedList<char, List<int>>>();
+
+			Dictionary<int, List<int>> NewEpsilonDeltaFunction = new Dictionary<int, List<int>>();
+
+			foreach(int id in attainableStatesIds)
+            {
+				if(DeltaFunction.ContainsKey(id))
+                {
+					NewDeltaFunction[id] = DeltaFunction[id];
+                }
+
+				if(EpsilonDeltaFunction.ContainsKey(id))
+                {
+					NewEpsilonDeltaFunction[id] = EpsilonDeltaFunction[id];
+                }
+            }
+
+			DeltaFunction = NewDeltaFunction;
+
+			EpsilonDeltaFunction = NewEpsilonDeltaFunction;
+		}
+		private List<int> ExpandAttainableStates(List<int> currentStatesIds, List<int> attainableStatesIds)
+        {
+			List<int> NewCurrentStates = new List<int>();
+			foreach(int id in currentStatesIds)
+            {
+				if(DeltaFunction.ContainsKey(id))
+                {
+					SortedList<char, List<int>> EndStates = DeltaFunction[id];
+
+					foreach(KeyValuePair<char, List<int>> pair1 in EndStates)
+                    {
+						foreach(int item in pair1.Value)
+                        {
+							if(!attainableStatesIds.Contains(item))
+                            {
+								attainableStatesIds.Add(item);
+								NewCurrentStates.Add(item);
+                            }
+                        }
+                    }
+                }
+
+				if(EpsilonDeltaFunction.ContainsKey(id))
+                {
+					List<int> EndStates = EpsilonDeltaFunction[id];
+
+					foreach(int item in EndStates)
+                    {
+						if(!attainableStatesIds.Contains(item))
+                        {
+							attainableStatesIds.Add(item);
+							NewCurrentStates.Add(item);
+						}
+                    }
+                }
+            }
+
+			return NewCurrentStates;
+        }
 	}
 }

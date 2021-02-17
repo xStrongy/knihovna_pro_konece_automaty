@@ -66,30 +66,8 @@ namespace TridniKnihovna
 			Writer.WriteEndElement();
 		}
 
-		private void IsValidAutomaton()
-		{
-			/*if (InitialStateId is null || FinalStates.Count == 0)
-			{
-				throw new NoValidAutomatonException();
-			}*/
-
-			if (Alphabet.Trim().Equals(""))
-			{
-				throw new NoValidAutomatonException();
-			}
-		}
-
 		public bool Accepts(string input)
 		{
-			try
-			{
-				IsValidAutomaton();
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e.Message);
-				return false;
-			}
 
 			int currenentStateId = this.InitialStateId;
 			foreach (char c in input)
@@ -97,7 +75,7 @@ namespace TridniKnihovna
 				currenentStateId = DoDeltaFunction(currenentStateId, c);
 			}
 
-			return FinalStates.Any(x => x.Id == currenentStateId);
+			return AcceptStates.Any(x => x.Id == currenentStateId);
 		}
 
 		private int DoDeltaFunction(int currentStateId, char by)

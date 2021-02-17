@@ -20,14 +20,14 @@ namespace TridniKnihovna
 			this.Alphabet = Alphabet;
 		}
 
-		public IReadOnlyList<State> FinalStates
+		public IReadOnlyList<State> AcceptStates
 		{
 			get
 			{
 				List<State> f = new List<State>();
 				foreach (State s in States.Values)
 				{
-					if (s.IsFinal)
+					if (s.IsAccept)
 					{
 						f.Add(s);
 					}
