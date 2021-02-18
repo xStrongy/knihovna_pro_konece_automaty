@@ -72,6 +72,7 @@ namespace TridniKnihovna
 				}
 			}
 			Writer.WriteEndElement();
+			Writer.Close();
 		}
 
 		private void IsValidAutomaton()

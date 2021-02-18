@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml;
 using TridniKnihovna;
 
 namespace Knihovna_pro_praci_s_konecnymi_automaty
@@ -54,6 +55,12 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
             {
                 Console.WriteLine("Neprijima");
             }
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.NewLineOnAttributes = true;
+            settings.ConformanceLevel = ConformanceLevel.Fragment;
+            XmlWriter writer = XmlWriter.Create("test.xml", settings);
+            NFA.Save2Xml(writer);
             NFA.DeleteUnattainableStates();
 
            /* states.Add(new State(1, "q0", true, true));

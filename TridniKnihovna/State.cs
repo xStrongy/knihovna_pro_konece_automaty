@@ -55,9 +55,18 @@ namespace TridniKnihovna
         {
             Writer.WriteStartElement("State");
             Writer.WriteAttributeString("Id", Id.ToString());
-            Writer.WriteAttributeString("Label", Label);        // co se stane s prazdym label
-            Writer.WriteAttributeString("IsInitial", IsInitial.ToString());
-            Writer.WriteAttributeString("IsAccept", IsAccept.ToString());
+            if (!string.IsNullOrEmpty(mLabel))
+            {
+                Writer.WriteAttributeString("Label", mLabel);
+            }
+            if (IsInitial)
+            {
+                Writer.WriteAttributeString("IsInitial", IsInitial.ToString());
+            }
+            if (IsAccept)
+            {
+                Writer.WriteAttributeString("IsAccept", IsAccept.ToString());
+            }
             Writer.WriteEndElement();
         }
 
