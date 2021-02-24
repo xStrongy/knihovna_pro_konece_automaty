@@ -50,8 +50,13 @@ namespace TridniKnihovna
 
 		}
 
-		public void Save2Xml(XmlWriter Writer)
+		public void Save2Xml()
 		{
+			XmlWriterSettings settings = new XmlWriterSettings();
+			settings.Indent = true;
+			settings.NewLineOnAttributes = true;
+			XmlWriter Writer = XmlWriter.Create("test.xml", settings);
+			Writer.WriteStartDocument();
 			base.Save2Xml(Writer);
 			Writer.WriteStartElement("DeltaFunction");
 			foreach (KeyValuePair<int, SortedList<char, List<int>>> pair1 in DeltaFunction)
@@ -72,6 +77,7 @@ namespace TridniKnihovna
 				}
 			}
 			Writer.WriteEndElement();
+			Writer.WriteEndDocument();
 			Writer.Close();
 		}
 
@@ -268,8 +274,95 @@ namespace TridniKnihovna
 			DeltaFunction = NewDeltaFunction;
 
 			EpsilonDeltaFunction = NewEpsilonDeltaFunction;
+
+			foreach(KeyValuePair<int, State> pair in States)
+			{
+				if(!attainableStatesIds.Contains(pair.Key))
+                {
+					States.Remove(pair.Key);
+                }
+            }
+				
 		}
-		private List<int> ExpandAttainableStates(List<int> currentStatesIds, List<int> attainableStatesIds)
+
+		public void DeleteUnnecessaryStates() // JESTE TREBA DODELAT !
+        {
+			List<int> necessaryStatesIds = new List<int>();
+
+			List<int> currentStatesIds = new List<int>();
+
+			Dictionary<int, SortedList<char, List<int>>> NewDeltaFunction = new Dictionary<int, SortedList<char, List<int>>>();
+
+			Dictionary<int, List<int>> NewEpsilonDeltaFunction = new Dictionary<int, List<int>>();
+
+			foreach (State s in AcceptStates)
+            {
+				necessaryStatesIds.Add(s.Id);
+				currentStatesIds.Add(s.Id);
+            }
+
+			while (currentStatesIds.Count != 0)
+			{
+				currentStatesIds = ExpandNecessaryStates(currentStatesIds, necessaryStatesIds, 
+					NewDeltaFunction, NewEpsilonDeltaFunction);
+			}
+			
+
+			DeltaFunction = NewDeltaFunction;
+
+			EpsilonDeltaFunction = NewEpsilonDeltaFunction;
+
+			foreach (KeyValuePair<int, State> pair in States)
+			{
+				if (!necessaryStatesIds.Contains(pair.Key))
+				{
+					States.Remove(pair.Key);
+				}
+			}
+		}
+
+        private List<int> ExpandNecessaryStates(List<int> currentStatesIds, List<int> necessaryStatesIds,
+			Dictionary<int, SortedList<char, List<int>>> NewDeltaFunction, Dictionary<int, List<int>> NewEpsilonDeltaFunction)
+        {
+			List<int> NewCurrentStates = new List<int>();
+			
+			foreach(KeyValuePair<int, SortedList<char, List<int>>> pair1 in DeltaFunction)
+            {
+				foreach (KeyValuePair<char, List<int>> pair2 in pair1.Value)
+                {
+					foreach (int id in pair2.Value)
+                    {
+						if(currentStatesIds.Contains(id))
+                        {
+							if (!NewCurrentStates.Contains(pair1.Key) && !necessaryStatesIds.Contains(pair1.Key))
+							{
+								NewCurrentStates.Add(pair1.Key);
+								necessaryStatesIds.Add(pair1.Key);
+							}
+						}
+                    }
+                }
+            }
+
+			foreach (KeyValuePair<int, List<int>> pair1 in EpsilonDeltaFunction)
+			{
+				foreach(int id in pair1.Value)
+                {
+					if(currentStatesIds.Contains(id))
+                    {
+						if(!NewCurrentStates.Contains(pair1.Key) && !necessaryStatesIds.Contains(pair1.Key))
+                        {
+							NewCurrentStates.Add(pair1.Key);
+							necessaryStatesIds.Add(pair1.Key);
+                        }
+					}
+                }
+			}
+
+			return NewCurrentStates;
+        }
+
+        private List<int> ExpandAttainableStates(List<int> currentStatesIds, List<int> attainableStatesIds)
         {
 			List<int> NewCurrentStates = new List<int>();
 			foreach(int id in currentStatesIds)

@@ -26,8 +26,7 @@ namespace TridniKnihovna
                 mLabel = value;
             }
         }
-
-        public State(int Id, string Label, bool IsInitial, bool IsAccept)
+       public State(int Id, string Label, bool IsInitial, bool IsAccept)
         {
             this.Id = Id;
             this.Label = Label;

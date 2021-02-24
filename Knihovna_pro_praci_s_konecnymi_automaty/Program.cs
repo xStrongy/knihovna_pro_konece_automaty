@@ -18,7 +18,7 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
             states.Add(new State(4, "q3", false, false));
             states.Add(new State(5, "q4", false, false));
             states.Add(new State(6, "q5", false, false));
-            states.Add(new State(7, "q6", false, true));
+            states.Add(new State(7, "q6", false, false));
             states.Add(new State(8, "q7", false, true));
             states.Add(new State(9, "q8", false, true));
             states.Add(new State(10, "q9", false, false));
@@ -55,12 +55,9 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
             {
                 Console.WriteLine("Neprijima");
             }
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Indent = true;
-            settings.NewLineOnAttributes = true;
-            settings.ConformanceLevel = ConformanceLevel.Fragment;
-            XmlWriter writer = XmlWriter.Create("test.xml", settings);
-            NFA.Save2Xml(writer);
+           
+            NFA.Save2Xml();
+            NFA.DeleteUnnecessaryStates();
             NFA.DeleteUnattainableStates();
 
            /* states.Add(new State(1, "q0", true, true));
