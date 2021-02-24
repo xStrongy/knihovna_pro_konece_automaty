@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
@@ -49,7 +50,6 @@ namespace TridniKnihovna
 			}
 
 		}
-
 		public void Save2Xml()
 		{
 			XmlWriterSettings settings = new XmlWriterSettings();
@@ -57,6 +57,7 @@ namespace TridniKnihovna
 			settings.NewLineOnAttributes = true;
 			XmlWriter Writer = XmlWriter.Create("test.xml", settings);
 			Writer.WriteStartDocument();
+			Writer.WriteStartElement("Automaton");
 			base.Save2Xml(Writer);
 			Writer.WriteStartElement("DeltaFunction");
 			foreach (KeyValuePair<int, SortedList<char, List<int>>> pair1 in DeltaFunction)
@@ -76,6 +77,23 @@ namespace TridniKnihovna
 					}
 				}
 			}
+			Writer.WriteEndElement();
+			Writer.WriteStartElement("EpsilonDeltaFunction");
+
+			foreach(KeyValuePair<int, List<int>> pair1 in EpsilonDeltaFunction)
+            {
+				foreach(int id in pair1.Value)
+                {
+					int From = pair1.Key;
+					int To = id;
+					Writer.WriteStartElement("EpsilonDeltaFunctionPair");
+					Writer.WriteAttributeString("From", From.ToString());
+					Writer.WriteAttributeString("To", To.ToString());
+					Writer.WriteEndElement();
+                }
+            }
+
+			Writer.WriteEndElement();
 			Writer.WriteEndElement();
 			Writer.WriteEndDocument();
 			Writer.Close();

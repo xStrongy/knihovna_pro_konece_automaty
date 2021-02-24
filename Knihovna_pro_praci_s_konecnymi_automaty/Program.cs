@@ -39,10 +39,10 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
 
 
             SortedList<int, List<int>> EpsilonTransition = new SortedList<int, List<int>>();
-            EpsilonTransition.Add(1, new List<int> { 2});
-            EpsilonTransition.Add(4, new List<int> { 7});
+            EpsilonTransition.Add(1, new List<int> { 2 });
+            EpsilonTransition.Add(4, new List<int> { 7 });
             EpsilonTransition.Add(7, new List<int> { 12 });
-            EpsilonTransition.Add(8, new List<int> { 10 });
+            EpsilonTransition.Add(8, new List<int> { 10, 12 });
             EpsilonTransition.Add(9, new List<int> { 11 });
             EpsilonTransition.Add(10, new List<int> { 12 });
 
@@ -56,9 +56,12 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
                 Console.WriteLine("Neprijima");
             }
            
+
             NFA.Save2Xml();
-            NFA.DeleteUnnecessaryStates();
-            NFA.DeleteUnattainableStates();
+            //NFA.DeleteUnnecessaryStates();
+            //NFA.DeleteUnattainableStates();
+            XmlAutomataReader reader = new XmlAutomataReader();
+            NondeterministicFiniteAutomaton NFA2 = reader.ReadFromXml("test.xml");
 
            /* states.Add(new State(1, "q0", true, true));
             states.Add(new State(2, "q1", false, false));

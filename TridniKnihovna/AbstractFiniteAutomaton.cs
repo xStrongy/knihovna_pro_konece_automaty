@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -38,10 +39,12 @@ namespace TridniKnihovna
 
 		public void Save2Xml(XmlWriter Writer)
 		{
+			Writer.WriteStartElement("States");
 			foreach (State s in States.Values)
 			{
 				s.Save2Xml(Writer);
 			}
+			Writer.WriteEndElement();
 			Writer.WriteStartElement("Alphabet");
 			Writer.WriteString(Alphabet);
 			Writer.WriteEndElement();

@@ -34,12 +34,12 @@ namespace TridniKnihovna
             this.IsAccept = IsAccept;
         }
 
-        public State(XmlReader Reader)
+        public State(XmlNode Node)
         {
-            this.Id = int.Parse(Reader["Id"]);
-            this.Label = Reader["Label"];
-            this.IsInitial = bool.Parse(Reader["IsInitial"]);
-            this.IsAccept = bool.Parse(Reader["IsAccept"]);
+            Id = int.Parse(Node.Attributes["Id"].Value);
+            mLabel = Node.Attributes["Label"] != null ? Node.Attributes["Label"].Value.Trim() : string.Empty;
+            IsInitial = Node.Attributes["IsInitial"] != null ? bool.Parse(Node.Attributes["IsInitial"].Value) : false;
+            IsAccept = Node.Attributes["IsAccept"] != null ? bool.Parse(Node.Attributes["IsAccept"].Value) : false;
         }
 
         public bool IsCommonState
