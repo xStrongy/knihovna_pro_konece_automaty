@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace TridniKnihovna
 {
-    internal class DeterministicFiniteAutomaton : AbstractFiniteAutomaton
+    public class DeterministicFiniteAutomaton : AbstractFiniteAutomaton
     {
 		protected Dictionary<int, SortedList<char, int>> DeltaFunction = new Dictionary<int, SortedList<char, int>>();
 
@@ -19,7 +19,7 @@ namespace TridniKnihovna
 		}
 		*/
 
-		internal DeterministicFiniteAutomaton(IEnumerable<State> States, string Alphabet, IEnumerable<DeltaFunctionTriplet> Triplets)
+		public DeterministicFiniteAutomaton(IEnumerable<State> States, string Alphabet, IEnumerable<DeltaFunctionTriplet> Triplets)
 			: base(States, Alphabet)
 		{
 			foreach (DeltaFunctionTriplet dft in Triplets)
@@ -45,9 +45,22 @@ namespace TridniKnihovna
 			}
 		}
 
-		public void Save2Xml(XmlWriter Writer)
+		public void Save2Xml()
 		{
+			XmlWriterSettings settings = new XmlWriterSettings();
+			settings.Indent = true;
+			settings.NewLineOnAttributes = true;
+
+			XmlWriter Writer = XmlWriter.Create("test2.xml", settings);
+
+			Writer.WriteStartDocument();
+
+			Writer.WriteStartElement("Automaton");
+
+			Writer.WriteAttributeString("Type", "deterministic");
+
 			base.Save2Xml(Writer);
+
 			Writer.WriteStartElement("DeltaFunction");
 			foreach (KeyValuePair<int, SortedList<char, int>> pair1 in DeltaFunction)
 			{
@@ -64,6 +77,9 @@ namespace TridniKnihovna
 				}
 			}
 			Writer.WriteEndElement();
+			Writer.WriteEndElement();
+			Writer.WriteEndDocument();
+			Writer.Close();
 		}
 
 		public bool Accepts(string input)

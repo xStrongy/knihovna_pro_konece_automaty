@@ -8,7 +8,7 @@ namespace TridniKnihovna
 {
     public class XmlAutomataReader
     {
-       public NondeterministicFiniteAutomaton ReadFromXml(string xmlPath)
+       public static NondeterministicFiniteAutomaton ReadFromXml(string xmlPath)
         {
 
             StreamReader xmlStreamReader = new StreamReader(xmlPath);
@@ -16,6 +16,14 @@ namespace TridniKnihovna
 
             xmlDoc.Load(xmlStreamReader);
             XmlNodeList nodes = xmlDoc.DocumentElement.ChildNodes;
+
+            string type = xmlDoc.DocumentElement.GetAttribute("Type");
+
+            if(!type.Equals("Nondeterministic"))
+            {
+                Console.WriteLine("Automaton cannot be read, because it is not nondeterministic");
+                return null;
+            }
 
             List<State> states = new List<State>();
 
