@@ -10,7 +10,7 @@ namespace TridniKnihovna
         public int Id { get; init; }
 
         private string mLabel;
-        public bool IsInitial { get; init; }
+        public bool IsInitial { get; set; }
         public bool IsAccept { get; init; }
 
         public string Label
@@ -68,27 +68,6 @@ namespace TridniKnihovna
             }
             Writer.WriteEndElement();
         }
-
-        public string GraphvizSourceCode
-        {
-            get
-            {
-                StringBuilder builder = new StringBuilder();
-                builder.Append(Id);
-                builder.Append("[");
-                if (!string.IsNullOrEmpty(Label))
-                {
-                    builder.AppendFormat("label=\"{0}\"", Label);
-                }
-                if (IsAccept)
-                {
-                    builder.Append("shape = doublecircle");
-                }
-                builder.Append("];");
-                return builder.ToString();
-            }
-        }
-
         public void Report()
         {
             Console.WriteLine("({0}, {1}, {2}, {3})", Id, mLabel, IsInitial, IsAccept);
