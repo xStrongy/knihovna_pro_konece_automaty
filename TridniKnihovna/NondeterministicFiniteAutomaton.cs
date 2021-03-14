@@ -232,9 +232,9 @@ namespace TridniKnihovna
             sb.Append("node [shape = doublecircle]; ");
 
             int i = 0;
-            foreach(State s in AcceptStates)
+            foreach (State s in AcceptStates)
             {
-                if( i == AcceptStates.Count - 1)
+                if (i == AcceptStates.Count - 1)
                 {
                     sb.Append(s.Label + ";\n");
                 }
@@ -247,38 +247,38 @@ namespace TridniKnihovna
 
             sb.Append("node [shape = circle];\n");
 
-            foreach(int id in InitialStateIds)
+            foreach (int id in InitialStateIds)
             {
                 shadowCounter++;
                 sb.Append("shadow" + shadowCounter + " -> " + States[id].Label + " [ label = \"\" ];\n");
             }
 
-            foreach(KeyValuePair<int, SortedList<char, List<int>>> pair1 in DeltaFunction)
+            foreach (KeyValuePair<int, SortedList<char, List<int>>> pair1 in DeltaFunction)
             {
-                foreach(KeyValuePair<char, List<int>> pair2 in pair1.Value)
+                foreach (KeyValuePair<char, List<int>> pair2 in pair1.Value)
                 {
-                    foreach(int EndStateId in pair2.Value)
+                    foreach (int EndStateId in pair2.Value)
                     {
                         sb.Append(States[pair1.Key].Label + " -> " + States[EndStateId].Label + "[ label = \"" + pair2.Key + "\" ];\n");
                     }
                 }
             }
 
-            foreach(KeyValuePair<int, List<int>> pair1 in EpsilonDeltaFunction)
+            foreach (KeyValuePair<int, List<int>> pair1 in EpsilonDeltaFunction)
             {
-                foreach(int EndStateId in pair1.Value)
+                foreach (int EndStateId in pair1.Value)
                 {
                     sb.Append(States[pair1.Key].Label + " -> " + States[EndStateId].Label + "[ label = \"ε\" ];\n");
                 }
             }
 
-            for(int index = 1 ; index <= shadowCounter ; index++)
+            for (int index = 1; index <= shadowCounter; index++)
             {
                 sb.Append("shadow" + index + " [ style = invis ];\n");
             }
 
             sb.Append("}");
-            return sb.ToString();   
+            return sb.ToString();
         }
 
         /// <summary>
@@ -296,6 +296,141 @@ namespace TridniKnihovna
 
             DeleteUnnecessaryStates();
 
+        }
+
+        public void DeleteEpsilonTransitions()
+        {
+            Dictionary<int, List<int>> EpsilonSeals = new Dictionary<int, List<int>>();
+
+            List<int> currentStatesIds = new List<int>();
+
+            Dictionary<int, SortedList<char, List<int>>> NewDeltaFunction = new Dictionary<int, SortedList<char, List<int>>>();
+
+            foreach (KeyValuePair<int, State> state in States)
+            {
+                currentStatesIds.Add(state.Key);
+
+                ExpandCurrentStatesByEpsilonTransitions(currentStatesIds);
+
+                if (currentStatesIds.Count == 1)
+                {
+                    currentStatesIds.Clear();
+                }
+                else
+                {
+                    currentStatesIds.Remove(state.Key);
+
+                    EpsilonSeals.Add(state.Key, new List<int>(currentStatesIds));
+
+                    currentStatesIds.Clear();
+                }
+            }
+
+            foreach (KeyValuePair<int, List<int>> EpsilonSeal in EpsilonSeals)
+            {
+                if (States[EpsilonSeal.Key].IsInitial)
+                {
+                    foreach (int id in EpsilonSeal.Value)
+                    {
+                        States[id].IsInitial = true;
+                        if (!InitialStateIds.Contains(id))
+                        {
+                            InitialStateIds.Add(id);
+                        }
+                    }
+                }
+            }
+
+            SortedList<int, List<char>> LinkedStates = new SortedList<int, List<char>>();
+
+            foreach (KeyValuePair<int, List<int>> EpsilonSeal in EpsilonSeals)
+            {
+                LinkedStates = FindLinkedStates(EpsilonSeal.Key);
+
+                foreach (KeyValuePair<int, List<char>> LinkedState in LinkedStates)
+                {
+                    foreach (char c in LinkedState.Value)
+                    {
+                        foreach (int id in EpsilonSeal.Value)
+                        {
+                            if (NewDeltaFunction.TryGetValue(LinkedState.Key, out SortedList<char, List<int>> value))
+                            {
+                                if (NewDeltaFunction[LinkedState.Key].TryGetValue(c, out List<int> value1))
+                                {
+                                    if (!value1.Contains(id))
+                                    {
+                                        value1.Add(id);
+                                    }
+                                }
+                                else
+                                {
+                                    value1 = new List<int>();
+                                    value1.Add(id);
+                                    NewDeltaFunction[LinkedState.Key].Add(c, value1);
+                                }
+                            }
+                            else
+                            {
+                                List<int> ids = new List<int>();
+                                ids.Add(id);
+                                value = new SortedList<char, List<int>>();
+                                value.Add(c, ids);
+                                NewDeltaFunction.Add(LinkedState.Key, value);
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<int, SortedList<char, List<int>>> pair1 in NewDeltaFunction)
+            {
+                foreach (KeyValuePair<char, List<int>> pair2 in pair1.Value)
+                {
+                    SortedList<char, List<int>> EndStates = DeltaFunction[pair1.Key];
+                    List<int> EndStateIds = EndStates[pair2.Key];
+                    foreach (int id in pair2.Value)
+                    {
+                        if (!EndStateIds.Contains(id))
+                        {
+                            EndStateIds.Add(id);
+                        }
+                    }
+                    EndStates[pair2.Key] = EndStateIds;
+                    DeltaFunction[pair1.Key] = EndStates;
+                }
+            }
+
+            EpsilonDeltaFunction.Clear();
+        }
+
+        private SortedList<int, List<char>> FindLinkedStates(int key)
+        {
+            SortedList<int, List<char>> LinkedStates = new SortedList<int, List<char>>();
+
+            foreach (KeyValuePair<int, SortedList<char, List<int>>> pair1 in DeltaFunction)
+            {
+                foreach (KeyValuePair<char, List<int>> pair2 in pair1.Value)
+                {
+                    foreach (int id in pair2.Value)
+                    {
+                        if (id == key)
+                        {
+                            if (LinkedStates.TryGetValue(pair1.Key, out List<char> value))
+                            {
+                                value.Add(pair2.Key);
+                            }
+                            else
+                            {
+                                value = new List<char>();
+                                value.Add(pair2.Key);
+                                LinkedStates.Add(pair1.Key, value);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return LinkedStates;
         }
 
         /// <summary>
@@ -371,6 +506,10 @@ namespace TridniKnihovna
                 {
                     foreach (int id in currentStateIds)
                     {
+                        if(!DeltaFunction.ContainsKey(id))
+                        {
+                            continue;
+                        }
                         SortedList<char, List<int>> EndStates = DeltaFunction[id];
 
                         if (!EndStates.ContainsKey(c))
