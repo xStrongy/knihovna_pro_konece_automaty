@@ -506,7 +506,7 @@ namespace TridniKnihovna
                 {
                     foreach (int id in currentStateIds)
                     {
-                        if(!DeltaFunction.ContainsKey(id))
+                        if (!DeltaFunction.ContainsKey(id))
                         {
                             continue;
                         }
@@ -964,6 +964,105 @@ namespace TridniKnihovna
             }
 
             return true;
+        }
+
+        public void addEpsilonTransition(int from, int to)
+        {
+            if (EpsilonDeltaFunction.TryGetValue(from, out List<int> value))
+            {
+                if (!value.Contains(to))
+                {
+                    value.Add(to);
+                }
+            }
+            else
+            {
+                value = new List<int>();
+                value.Add(to);
+                EpsilonDeltaFunction.Add(from, value);
+            }
+        }
+
+        public void addTransition(int from, char by, int to)
+        {
+            if (DeltaFunction.TryGetValue(from, out SortedList<char, List<int>> value))
+            {
+                if(value.TryGetValue(by, out List<int> value2))
+                {
+                    if(!value2.Contains(to))
+                    {
+                        value2.Add(to);
+                    }
+                }
+                else
+                {
+                    value2 = new List<int>();
+                    value2.Add(to);
+                    value.Add(by, value2);
+                }
+            }
+            else
+            {
+                value = new SortedList<char, List<int>>();
+                List<int> list = new List<int>();
+                list.Add(to);
+                value.Add(by, list);
+                DeltaFunction.Add(from, value);
+            }
+        }
+
+        public List<State> GetStates()
+        {
+            List<State> returnStates = new List<State>();
+
+            foreach(KeyValuePair<int, State> state in States)
+            {
+                returnStates.Add(state.Value);
+            }
+
+            return returnStates;
+        }
+
+        public List<DeltaFunctionTriplet> GetTriplets()
+        {
+            List<DeltaFunctionTriplet> returnTriplets = new List<DeltaFunctionTriplet>();
+
+            foreach(KeyValuePair<int, SortedList<char, List<int>>> pair1 in DeltaFunction)
+            {
+                foreach(KeyValuePair<char, List<int>> pair2 in pair1.Value)
+                {
+                    foreach(int id in pair2.Value)
+                    {
+                        returnTriplets.Add(new DeltaFunctionTriplet(pair1.Key, pair2.Key, id));
+                    }
+                }
+            }
+
+            return returnTriplets;
+        }
+
+        public SortedList<int, List<int>> GetEpsilonTransitions()
+        {
+            SortedList<int, List<int>> returnEpsilonTransition = new SortedList<int, List<int>>();
+
+            foreach(KeyValuePair<int, List<int>> pair1 in EpsilonDeltaFunction)
+            {
+                foreach(int id in pair1.Value)
+                {
+                    if(returnEpsilonTransition.TryGetValue(pair1.Key, out List<int> value))
+                    {
+                        value.Add(id);
+                    }
+                    else
+                    {
+                        value = new List<int>();
+                        value.Add(id);
+                        returnEpsilonTransition.Add(pair1.Key, value);
+                    }
+                }
+            }
+
+            return returnEpsilonTransition;
         }
     }
 }

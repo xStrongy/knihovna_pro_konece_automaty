@@ -10,7 +10,15 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
         static void Main(string[] args)
         {
             string input = "aa";
-            string Alphabet = "ab";
+            string Alphabet = "a";
+            string RegEx = "(a|b)?";
+
+            AutomataBuilder builder = new AutomataBuilder();
+            NondeterministicFiniteAutomaton NFA1 = builder.BuildNonDeterministicFiniteAutomatonFromRegularExpression(RegEx, Alphabet);
+            NFA1.ReduceAutomaton();
+            string dotcode = NFA1.GetDotSourceCode();
+            DeterministicFiniteAutomaton DFA1 = NFA1.ConvertToDeterministicFiniteAutomaton();
+            //dotcode = DFA1.GetDotSourceCode();
             List<State> states = new List<State>();
             /*states.Add(new State(1, "q0", true, false));
             states.Add(new State(2, "q1", false, false));

@@ -205,7 +205,7 @@ namespace TridniKnihovna
 
                 SortedList<char, int> NewEndStates = new SortedList<char, int>();
 
-                foreach(char c in Alphabet)
+                foreach (char c in Alphabet)
                 {
                     int j = GroupRecorder[group.Key].ElementAt(0);
                     int i = Table[j].GetValueOrDefault(c);
@@ -214,7 +214,7 @@ namespace TridniKnihovna
 
                 NewDeltaFunction[GroupRecorder[group.Key].ElementAt(0)] = NewEndStates;
 
-                if(hasInitialState == true)
+                if (hasInitialState == true)
                 {
                     NewStates[GroupRecorder[group.Key].ElementAt(0)].IsInitial = true;
                 }
@@ -343,6 +343,52 @@ namespace TridniKnihovna
 
                 GroupRecorder[GroupRecorder.Count] = NewStates;
             }
+        }
+
+        public string GetDotSourceCode()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            int shadowCounter = 0;
+
+            sb.Append("digraph finite_state_machine {\n");
+            sb.Append("rankdir=LR\n");
+            sb.Append("size=\"8,5\"\n");
+            sb.Append("node [shape = doublecircle]; ");
+
+            int i = 0;
+            foreach (State s in AcceptStates)
+            {
+                if (i == AcceptStates.Count - 1)
+                {
+                    sb.Append(s.Label + ";\n");
+                }
+                else
+                {
+                    sb.Append(s.Label + " ");
+                }
+                i++;
+            }
+
+            sb.Append("node [shape = circle];\n");
+
+
+            shadowCounter++;
+            sb.Append("shadow" + shadowCounter + " -> " + States[InitialStateId].Label + " [ label = \"\" ];\n");
+
+
+            foreach (KeyValuePair<int, SortedList<char, int>> pair1 in DeltaFunction)
+            {
+                foreach (KeyValuePair<char, int> pair2 in pair1.Value)
+                {
+                    sb.Append(States[pair1.Key].Label + " -> " + States[pair2.Value].Label + "[ label = \"" + pair2.Key + "\" ];\n");
+                }
+            }
+
+            sb.Append("shadow" + 1 + " [ style = invis ];\n");
+
+            sb.Append("}");
+            return sb.ToString();
         }
     }
 }
