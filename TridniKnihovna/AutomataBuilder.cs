@@ -28,7 +28,7 @@ namespace TridniKnihovna
 
             int automatonCounter = 0;
 
-            foreach(string s in words)
+            foreach (string s in words)
             {
                 automatonCounter++;
                 State startState = new State(stateCounter + 1, s + automatonCounter, false, false);
@@ -36,9 +36,9 @@ namespace TridniKnihovna
                 states.Add(startState);
                 startingStatesIds.Add(startState.Id);
 
-                for(int i = 0 ; i < s.Length ; i++ )
+                for (int i = 0; i < s.Length; i++)
                 {
-                    if(i == s.Length - 1)
+                    if (i == s.Length - 1)
                     {
                         State endState = new State(stateCounter + 1, "FinalState" + automatonCounter, false, false);
                         endingStatesIds.Add(endState.Id);
@@ -56,11 +56,11 @@ namespace TridniKnihovna
                 }
             }
 
-            foreach(int id in startingStatesIds)
+            foreach (int id in startingStatesIds)
             {
-                if(Epsilons.TryGetValue(1, out List<int> value))
+                if (Epsilons.TryGetValue(1, out List<int> value))
                 {
-                    if(!value.Contains(id))
+                    if (!value.Contains(id))
                     {
                         value.Add(id);
                     }
@@ -109,64 +109,117 @@ namespace TridniKnihovna
 
         public NondeterministicFiniteAutomaton BuildAutomatonFromRegularGrammar(List<string> RegularGrammar)
         {
-            List<char> Nonterminals = new List<char>();
+            List<string> Nonterminals = new List<string>();
             List<State> states = new List<State>();
             List<DeltaFunctionTriplet> triplets = new List<DeltaFunctionTriplet>();
             SortedList<int, List<int>> Epsilons = new SortedList<int, List<int>>();
             int stateCounter = 0;
 
-            foreach (string line in RegularGrammar)
-            {
-                string[] splitted = line.Split('-');
-                Nonterminals.Add(splitted[0].ToCharArray()[0]);
-            }
-
             BuildAlphabetFromRegularGrammar(RegularGrammar);
 
-            foreach (char c in Nonterminals)
-            {
-                stateCounter++;
-                states.Add(new State(stateCounter, c.ToString(), false, false));
-            }
-
-            states.Add(new State(stateCounter + 1, "finalState", false, true));
-
-            states.Find(x => x.Id == 1).IsInitial = true;
+            State finalState = new State(1, "final", false, true);
+            states.Add(finalState);
+            stateCounter++;
 
             foreach (string line in RegularGrammar)
             {
                 string expression = line.Replace(" ", "");
-                string LeadNonterminal = expression[0].ToString();
-                string[] splittedFromPipes = expression.Substring(2).Split('|');
 
-                foreach (string part in splittedFromPipes)
+                string[] splitNonterminals = expression.Split("::=");
+                string nonterminal = splitNonterminals[0].Substring(1, splitNonterminals[0].Length - 2);
+                Nonterminals.Add(nonterminal);
+                State state = new State(stateCounter + 1, nonterminal, false, false);
+                stateCounter++;
+                states.Add(state);
+            }
+
+            states.Find(x => x.Id == 2).IsInitial = true;
+
+            foreach (string line in RegularGrammar)
+            {
+                string expression = line.Replace(" ", "");
+
+                string[] splitNonterminals = expression.Split("::=");
+                string[] splittedFromPipes = splitNonterminals[1].Split('|');
+                string nonterminal = splitNonterminals[0].Substring(1, splitNonterminals[0].Length - 2);
+
+                foreach (string partOfLine in splittedFromPipes)
                 {
-                    if (part.Length == 1 && !part.Equals("ε"))
+                    string[] splitFromNonterminals = partOfLine.Split('\'');
+                    string nonterminalInRule = "";
+                    if (splitFromNonterminals[2].Length != 0)
                     {
-                        triplets.Add(new DeltaFunctionTriplet(states.Find(x => x.Label.Equals(LeadNonterminal)).Id,
-                            part.ToCharArray()[0], states[states.Count - 1].Id));
+                        nonterminalInRule = splitFromNonterminals[2].Substring(1, splitFromNonterminals[2].Length - 2);
                     }
-
-                    if (part.Length == 2)
+                    if (splitFromNonterminals[1].Length == 1 && !splitFromNonterminals[1].Equals("ε"))
                     {
-                        triplets.Add(new DeltaFunctionTriplet(states.Find(x => x.Label.Equals(LeadNonterminal)).Id,
-                            part.ToCharArray()[0], states.Find(x => x.Label == part[1].ToString()).Id));
-                    }
-
-                    if (part.Equals("ε"))
-                    {
-                        if (Epsilons.TryGetValue(states.Find(x => x.Label.Equals(LeadNonterminal)).Id, out List<int> value))
+                        if (nonterminalInRule.Equals(""))
                         {
-                            if (!value.Contains(states[states.Count - 1].Id))
-                            {
-                                value.Add(states[states.Count - 1].Id);
-                            }
+                            triplets.Add(new DeltaFunctionTriplet(states.Find(x => x.Label.Equals(nonterminal)).Id,
+                            splitFromNonterminals[1].ToCharArray()[0], 1));
+                            break;
                         }
-                        else
+                        triplets.Add(new DeltaFunctionTriplet(states.Find(x => x.Label.Equals(nonterminal)).Id,
+                            splitFromNonterminals[1].ToCharArray()[0], states.Find(x => x.Label.Equals(nonterminalInRule)).Id));
+                    }
+
+                    if (splitFromNonterminals[1].Equals("ε"))
+                    {
+                        triplets.Add(new DeltaFunctionTriplet(states.Find(x => x.Label.Equals(nonterminal)).Id, 'ε', 1));
+                    }
+
+                    int lastId = 0;
+
+                    if (splitFromNonterminals[1].Length > 1 && splitFromNonterminals[2].Equals(""))
+                    {
+                        for (int i = 0; i < splitFromNonterminals[1].Length; i++)
                         {
-                            value = new List<int>();
-                            value.Add(states[states.Count - 1].Id);
-                            Epsilons.Add(states.Find(x => x.Label.Equals(LeadNonterminal)).Id, value);
+                            if(i == splitFromNonterminals[1].Length - 1)
+                            {
+                                triplets.Add(new DeltaFunctionTriplet(lastId, splitFromNonterminals[1][i], 1));
+                                break;
+                            }
+                            State newState = new State(stateCounter + 1,
+                                splitFromNonterminals[1].Substring(i + 1), false, false);
+                            states.Add(newState);
+                            stateCounter++;
+                            lastId = newState.Id;
+                            triplets.Add(new DeltaFunctionTriplet(states.Find(x => x.Label.Equals(nonterminal)).Id,
+                               splitFromNonterminals[1][i], newState.Id));
+                        }
+
+                        continue;
+                    }
+
+                    if (splitFromNonterminals[1].Length > 1)
+                    {
+                        for (int i = 0; i < splitFromNonterminals[1].Length; i++)
+                        {
+                            if (i == splitFromNonterminals[1].Length - 1)
+                            {
+                                triplets.Add(new DeltaFunctionTriplet(lastId,
+                                splitFromNonterminals[1][i], states.Find(x => x.Label.Equals(nonterminalInRule)).Id));
+                                break;
+                            }
+                            if (i == 0)
+                            {
+                                State newState = new State(stateCounter + 1,
+                                    splitFromNonterminals[1].Substring(i + 1) + nonterminalInRule, false, false);
+                                states.Add(newState);
+                                stateCounter++;
+                                lastId = newState.Id;
+                                triplets.Add(new DeltaFunctionTriplet(states.Find(x => x.Label.Equals(nonterminal)).Id,
+                                    splitFromNonterminals[1][i], states.Find(x => x.Label.Equals(newState.Label)).Id));
+                                continue;
+                            }
+
+                            State state = new State(stateCounter + 1,
+                               splitFromNonterminals[1].Substring(i + 1) + nonterminalInRule, false, false);
+                            states.Add(state);
+                            stateCounter++;
+                            triplets.Add(new DeltaFunctionTriplet(lastId,
+                                splitFromNonterminals[1][i], states.Find(x => x.Label.Equals(state.Label)).Id));
+                            lastId = state.Id;
                         }
                     }
                 }
@@ -174,7 +227,6 @@ namespace TridniKnihovna
 
             return new NondeterministicFiniteAutomaton(states, Alphabet, triplets, Epsilons);
         }
-
         private void BuildAlphabetFromDerivationOfRegularExpression(HashSet<string> words)
         {
             this.Alphabet = "";
@@ -198,14 +250,18 @@ namespace TridniKnihovna
             foreach (string line in regularGrammar)
             {
                 string expression = line.Replace(" ", "");
-                string[] splitted = expression.Split('-');
+                string[] splitted = expression.Split("::=");
                 string[] splittedFromPipes = splitted[1].Split('|');
 
                 foreach (string partOfLine in splittedFromPipes)
                 {
-                    if (!this.Alphabet.Contains(partOfLine[0]) && !partOfLine[0].Equals('ε'))
+                    string[] splittedFromNonTerminals = partOfLine.Split('\'');
+                    for (int i = 0; i < splittedFromNonTerminals[1].Length; i++)
                     {
-                        this.Alphabet += partOfLine[0];
+                        if (!this.Alphabet.Contains(splittedFromNonTerminals[1][i]) && !splittedFromNonTerminals[1][i].Equals('ε'))
+                        {
+                            this.Alphabet += splittedFromNonTerminals[1][i];
+                        }
                     }
                 }
             }

@@ -19,9 +19,9 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
             words.Add("abc");
             words.Add("c");
 
-            RegularGrammar.Add("S - aA");
-            RegularGrammar.Add("A - ε | bS | bA | aB");
-            RegularGrammar.Add("B - b | aS");
+            RegularGrammar.Add("<S> ::= 'abc'<A> | 'b'<B>");
+            RegularGrammar.Add("<A> ::= 'bbaa'<B> | 'ε'");
+            RegularGrammar.Add("<B> ::= 'a'<A> | 'bb'");
 
             AutomataBuilder builder = new AutomataBuilder();
             NondeterministicFiniteAutomaton NFA1 = builder.BuildAutomatonFromRegularExpression(RegEx, Alphabet);
