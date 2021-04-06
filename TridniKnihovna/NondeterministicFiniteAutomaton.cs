@@ -965,52 +965,6 @@ namespace TridniKnihovna
 
             return true;
         }
-
-        public void addEpsilonTransition(int from, int to)
-        {
-            if (EpsilonDeltaFunction.TryGetValue(from, out List<int> value))
-            {
-                if (!value.Contains(to))
-                {
-                    value.Add(to);
-                }
-            }
-            else
-            {
-                value = new List<int>();
-                value.Add(to);
-                EpsilonDeltaFunction.Add(from, value);
-            }
-        }
-
-        public void addTransition(int from, char by, int to)
-        {
-            if (DeltaFunction.TryGetValue(from, out SortedList<char, List<int>> value))
-            {
-                if(value.TryGetValue(by, out List<int> value2))
-                {
-                    if(!value2.Contains(to))
-                    {
-                        value2.Add(to);
-                    }
-                }
-                else
-                {
-                    value2 = new List<int>();
-                    value2.Add(to);
-                    value.Add(by, value2);
-                }
-            }
-            else
-            {
-                value = new SortedList<char, List<int>>();
-                List<int> list = new List<int>();
-                list.Add(to);
-                value.Add(by, list);
-                DeltaFunction.Add(from, value);
-            }
-        }
-
         public List<State> GetStates()
         {
             List<State> returnStates = new List<State>();

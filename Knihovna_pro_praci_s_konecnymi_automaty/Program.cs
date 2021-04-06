@@ -12,11 +12,25 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
             string input = "aa";
             string Alphabet = "a";
             string RegEx = "(a|b)?";
+            List<string> RegularGrammar = new List<string>();
+            HashSet<string> words = new HashSet<string>();
+            words.Add("abc");
+            words.Add("abb");
+            words.Add("abc");
+            words.Add("c");
+
+            RegularGrammar.Add("S - aA");
+            RegularGrammar.Add("A - ε | bS | bA | aB");
+            RegularGrammar.Add("B - b | aS");
 
             AutomataBuilder builder = new AutomataBuilder();
-            NondeterministicFiniteAutomaton NFA1 = builder.BuildNonDeterministicFiniteAutomatonFromRegularExpression(RegEx, Alphabet);
-            NFA1.ReduceAutomaton();
-            string dotcode = NFA1.GetDotSourceCode();
+            NondeterministicFiniteAutomaton NFA1 = builder.BuildAutomatonFromRegularExpression(RegEx, Alphabet);
+            NondeterministicFiniteAutomaton NFA3 = builder.BuildAutomatonFromRegularGrammar(RegularGrammar);
+            NondeterministicFiniteAutomaton NFA4 = builder.BuildAutomatonFronDerivationOfRegularExpression(words);
+            NFA4.DeleteEpsilonTransitions();
+            DeterministicFiniteAutomaton DFA4 = NFA4.ConvertToDeterministicFiniteAutomaton();
+            string dotcodeNfa4 = DFA4.GetDotSourceCode();
+            string dotcode = NFA3.GetDotSourceCode();
             DeterministicFiniteAutomaton DFA1 = NFA1.ConvertToDeterministicFiniteAutomaton();
             //dotcode = DFA1.GetDotSourceCode();
             List<State> states = new List<State>();

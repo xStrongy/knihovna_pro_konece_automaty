@@ -7,7 +7,95 @@ namespace TridniKnihovna
     public class AutomataBuilder
     {
         private string Alphabet;
-        public NondeterministicFiniteAutomaton BuildNonDeterministicFiniteAutomatonFromRegularExpression(
+
+        public NondeterministicFiniteAutomaton BuildAutomatonFronDerivationOfRegularExpression(HashSet<string> words)
+        {
+            List<State> states = new List<State>();
+            List<DeltaFunctionTriplet> triplets = new List<DeltaFunctionTriplet>();
+            SortedList<int, List<int>> Epsilons = new SortedList<int, List<int>>();
+            int stateCounter = 0;
+
+            BuildAlphabetFromDerivationOfRegularExpression(words);
+
+            State start = new State(1, "q1", true, false);
+
+            stateCounter++;
+
+            states.Add(start);
+
+            List<int> startingStatesIds = new List<int>();
+            List<int> endingStatesIds = new List<int>();
+
+            int automatonCounter = 0;
+
+            foreach(string s in words)
+            {
+                automatonCounter++;
+                State startState = new State(stateCounter + 1, s + automatonCounter, false, false);
+                stateCounter++;
+                states.Add(startState);
+                startingStatesIds.Add(startState.Id);
+
+                for(int i = 0 ; i < s.Length ; i++ )
+                {
+                    if(i == s.Length - 1)
+                    {
+                        State endState = new State(stateCounter + 1, "FinalState" + automatonCounter, false, false);
+                        endingStatesIds.Add(endState.Id);
+                        stateCounter++;
+                        states.Add(endState);
+                        triplets.Add(new DeltaFunctionTriplet(endState.Id - 1, s[i], endState.Id));
+                        break;
+                    }
+
+                    string stateName = s.Substring(i + 1) + automatonCounter;
+                    State newState = new State(stateCounter + 1, stateName, false, false);
+                    stateCounter++;
+                    states.Add(newState);
+                    triplets.Add(new DeltaFunctionTriplet(newState.Id - 1, s[i], newState.Id));
+                }
+            }
+
+            foreach(int id in startingStatesIds)
+            {
+                if(Epsilons.TryGetValue(1, out List<int> value))
+                {
+                    if(!value.Contains(id))
+                    {
+                        value.Add(id);
+                    }
+                }
+                else
+                {
+                    value = new List<int>();
+                    value.Add(id);
+                    Epsilons.Add(1, value);
+                }
+            }
+
+            State end = new State(stateCounter + 1, "q" + (stateCounter + 1), false, true);
+            states.Add(end);
+
+            foreach (int id in endingStatesIds)
+            {
+                if (Epsilons.TryGetValue(id, out List<int> value))
+                {
+                    if (!value.Contains(end.Id))
+                    {
+                        value.Add(end.Id);
+                    }
+                }
+                else
+                {
+                    value = new List<int>();
+                    value.Add(end.Id);
+                    Epsilons.Add(id, value);
+                }
+            }
+
+            return new NondeterministicFiniteAutomaton(states, Alphabet, triplets, Epsilons);
+        }
+        public NondeterministicFiniteAutomaton BuildAutomatonFromRegularExpression(
             string RegularExpression, string Alphabet)
         {
             this.Alphabet = Alphabet;
@@ -18,6 +106,111 @@ namespace TridniKnihovna
 
             return NFA;
         }
+
+        public NondeterministicFiniteAutomaton BuildAutomatonFromRegularGrammar(List<string> RegularGrammar)
+        {
+            List<char> Nonterminals = new List<char>();
+            List<State> states = new List<State>();
+            List<DeltaFunctionTriplet> triplets = new List<DeltaFunctionTriplet>();
+            SortedList<int, List<int>> Epsilons = new SortedList<int, List<int>>();
+            int stateCounter = 0;
+
+            foreach (string line in RegularGrammar)
+            {
+                string[] splitted = line.Split('-');
+                Nonterminals.Add(splitted[0].ToCharArray()[0]);
+            }
+
+            BuildAlphabetFromRegularGrammar(RegularGrammar);
+
+            foreach (char c in Nonterminals)
+            {
+                stateCounter++;
+                states.Add(new State(stateCounter, c.ToString(), false, false));
+            }
+
+            states.Add(new State(stateCounter + 1, "finalState", false, true));
+
+            states.Find(x => x.Id == 1).IsInitial = true;
+
+            foreach (string line in RegularGrammar)
+            {
+                string expression = line.Replace(" ", "");
+                string LeadNonterminal = expression[0].ToString();
+                string[] splittedFromPipes = expression.Substring(2).Split('|');
+
+                foreach (string part in splittedFromPipes)
+                {
+                    if (part.Length == 1 && !part.Equals("ε"))
+                    {
+                        triplets.Add(new DeltaFunctionTriplet(states.Find(x => x.Label.Equals(LeadNonterminal)).Id,
+                            part.ToCharArray()[0], states[states.Count - 1].Id));
+                    }
+
+                    if (part.Length == 2)
+                    {
+                        triplets.Add(new DeltaFunctionTriplet(states.Find(x => x.Label.Equals(LeadNonterminal)).Id,
+                            part.ToCharArray()[0], states.Find(x => x.Label == part[1].ToString()).Id));
+                    }
+
+                    if (part.Equals("ε"))
+                    {
+                        if (Epsilons.TryGetValue(states.Find(x => x.Label.Equals(LeadNonterminal)).Id, out List<int> value))
+                        {
+                            if (!value.Contains(states[states.Count - 1].Id))
+                            {
+                                value.Add(states[states.Count - 1].Id);
+                            }
+                        }
+                        else
+                        {
+                            value = new List<int>();
+                            value.Add(states[states.Count - 1].Id);
+                            Epsilons.Add(states.Find(x => x.Label.Equals(LeadNonterminal)).Id, value);
+                        }
+                    }
+                }
+            }
+
+            return new NondeterministicFiniteAutomaton(states, Alphabet, triplets, Epsilons);
+        }
+
+        private void BuildAlphabetFromDerivationOfRegularExpression(HashSet<string> words)
+        {
+            this.Alphabet = "";
+
+            foreach (string s in words)
+            {
+                for (int i = 0; i < s.Length; i++)
+                {
+                    if (!Alphabet.Contains(s[i]))
+                    {
+                        this.Alphabet += s[i];
+                    }
+                }
+            }
+        }
+
+        private void BuildAlphabetFromRegularGrammar(List<string> regularGrammar)
+        {
+            this.Alphabet = "";
+
+            foreach (string line in regularGrammar)
+            {
+                string expression = line.Replace(" ", "");
+                string[] splitted = expression.Split('-');
+                string[] splittedFromPipes = splitted[1].Split('|');
+
+                foreach (string partOfLine in splittedFromPipes)
+                {
+                    if (!this.Alphabet.Contains(partOfLine[0]) && !partOfLine[0].Equals('ε'))
+                    {
+                        this.Alphabet += partOfLine[0];
+                    }
+                }
+            }
+        }
+
         private NondeterministicFiniteAutomaton toNFAfromParseTree(TreeNode root)
         {
             if (root.Label.Equals("Expression"))
@@ -165,7 +358,7 @@ namespace TridniKnihovna
 
             foreach (State s in statesNFA)
             {
-                states.Add(new State(s.Id + 1, "q" + (s.Id + 1), false, false ));
+                states.Add(new State(s.Id + 1, "q" + (s.Id + 1), false, false));
             }
 
             List<DeltaFunctionTriplet> tripletsNFA = NFA.GetTriplets();
@@ -196,7 +389,7 @@ namespace TridniKnihovna
 
             states.Add(end);
 
-            Epsilons.Add(1, new List<int> { firstStateOfNFA});
+            Epsilons.Add(1, new List<int> { firstStateOfNFA });
 
             if (Epsilons.TryGetValue(lastStateOfNFA, out List<int> value))
             {
@@ -230,14 +423,14 @@ namespace TridniKnihovna
 
             List<State> statesNFA = NFA.GetStates();
 
-            foreach(State s in statesNFA)
+            foreach (State s in statesNFA)
             {
                 states.Add(new State(s.Id + 1, "q" + (s.Id + 1), false, false));
             }
 
             List<DeltaFunctionTriplet> tripletsNFA = NFA.GetTriplets();
 
-            foreach(DeltaFunctionTriplet triplet in tripletsNFA)
+            foreach (DeltaFunctionTriplet triplet in tripletsNFA)
             {
                 triplets.Add(new DeltaFunctionTriplet(triplet.From + 1, triplet.By, triplet.To + 1));
             }
@@ -265,9 +458,9 @@ namespace TridniKnihovna
 
             Epsilons.Add(1, new List<int> { firstStateOfNFA, end.Id });
 
-            if(Epsilons.TryGetValue(lastStateOfNFA, out List<int> value))
+            if (Epsilons.TryGetValue(lastStateOfNFA, out List<int> value))
             {
-                if(!value.Contains(firstStateOfNFA))
+                if (!value.Contains(firstStateOfNFA))
                 {
                     value.Add(firstStateOfNFA);
                 }
