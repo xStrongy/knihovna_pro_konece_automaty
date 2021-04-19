@@ -10,8 +10,8 @@ namespace TridniKnihovna
         public int Id { get; init; }
 
         private string mLabel;
-        public bool IsInitial { get; set; }
-        public bool IsAccept { get; init; }
+        public bool IsInitial { get; internal set; }
+        public bool IsAccept { get; internal set; }
 
         public string Label
         {

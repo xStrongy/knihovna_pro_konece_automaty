@@ -73,12 +73,14 @@ namespace TridniKnihovna
                 }
             }
 
-            State end = new State(stateCounter + 1, "q" + (stateCounter + 1), false, true);
-            states.Add(end);
+            //State end = new State(stateCounter + 1, "q" + (stateCounter + 1), false, true);
+            //states.Add(end);
 
             foreach (int id in endingStatesIds)
             {
-                if (Epsilons.TryGetValue(id, out List<int> value))
+
+                states.Find(x => x.Id == id).IsAccept = true;
+                /*if (Epsilons.TryGetValue(id, out List<int> value))
                 {
                     if (!value.Contains(end.Id))
                     {
@@ -90,7 +92,7 @@ namespace TridniKnihovna
                     value = new List<int>();
                     value.Add(end.Id);
                     Epsilons.Add(id, value);
-                }
+                }*/
             }
 
             return new NondeterministicFiniteAutomaton(states, Alphabet, triplets, Epsilons);
@@ -543,6 +545,8 @@ namespace TridniKnihovna
 
             int lastStateOfFirst = states[states.Count - 1].Id;
 
+            states.Find(x => x.Id == lastStateOfFirst).IsAccept = false;
+
             int firstStateOfSecond = lastStateOfFirst + 1;
 
             List<State> statesSecond = second.GetStates();
@@ -551,7 +555,14 @@ namespace TridniKnihovna
 
             foreach (State s in statesSecond)
             {
-                states.Add(new State(s.Id + numberShift, "q" + (s.Id + numberShift), false, false));
+                if(s.IsAccept == true)
+                {
+                    states.Add(new State(s.Id + numberShift, "q" + (s.Id + numberShift), false, true));
+                }
+                else
+                {
+                    states.Add(new State(s.Id + numberShift, "q" + (s.Id + numberShift), false, false));
+                }
             }
 
             List<DeltaFunctionTriplet> tripletsSecond = second.GetTriplets();

@@ -10,11 +10,11 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
         static void Main(string[] args)
         {
             string input = "aa";
-            string Alphabet = "a";
-            string RegEx = "(a|b)?";
+            string Alphabet = "ab";
+            string RegEx = "a?b";
             List<string> RegularGrammar = new List<string>();
             HashSet<string> words = new HashSet<string>();
-            words.Add("abc");
+            words.Add("abbca");
             words.Add("abb");
             words.Add("abc");
             words.Add("c");
@@ -27,12 +27,14 @@ namespace Knihovna_pro_praci_s_konecnymi_automaty
             NondeterministicFiniteAutomaton NFA1 = builder.BuildAutomatonFromRegularExpression(RegEx, Alphabet);
             NondeterministicFiniteAutomaton NFA3 = builder.BuildAutomatonFromRegularGrammar(RegularGrammar);
             NondeterministicFiniteAutomaton NFA4 = builder.BuildAutomatonFronDerivationOfRegularExpression(words);
-            NFA4.DeleteEpsilonTransitions();
+            //NFA4.DeleteEpsilonTransitions();
             DeterministicFiniteAutomaton DFA4 = NFA4.ConvertToDeterministicFiniteAutomaton();
-            string dotcodeNfa4 = DFA4.GetDotSourceCode();
+            string dotcodeDfa4 = DFA4.GetDotSourceCode();
+            string dotcodeNfa4 = NFA4.GetDotSourceCode();
             string dotcode = NFA3.GetDotSourceCode();
+            string dotcodeNFA1 = NFA1.GetDotSourceCode();
             DeterministicFiniteAutomaton DFA1 = NFA1.ConvertToDeterministicFiniteAutomaton();
-            //dotcode = DFA1.GetDotSourceCode();
+            string dotcodeDfa1 = DFA1.GetDotSourceCode();
             List<State> states = new List<State>();
             /*states.Add(new State(1, "q0", true, false));
             states.Add(new State(2, "q1", false, false));
