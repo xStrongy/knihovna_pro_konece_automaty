@@ -54,7 +54,7 @@ namespace TridniKnihovna
         /// <summary>
         /// Saves automaton into XML file
         /// </summary>
-        public void Save2Xml()
+        public void Save2Xml(string xmlPath)
         {
             if (!IsValidAutomaton())
             {
@@ -66,7 +66,7 @@ namespace TridniKnihovna
             settings.Indent = true;
             settings.NewLineOnAttributes = true;
 
-            XmlWriter Writer = XmlWriter.Create("test.xml", settings);
+            XmlWriter Writer = XmlWriter.Create(xmlPath, settings);
 
             Writer.WriteStartDocument();
 

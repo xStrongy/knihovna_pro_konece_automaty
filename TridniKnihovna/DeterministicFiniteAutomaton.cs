@@ -39,13 +39,13 @@ namespace TridniKnihovna
             }
         }
 
-        public void Save2Xml()
+        public void Save2Xml(string xmlPath)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
             settings.NewLineOnAttributes = true;
 
-            XmlWriter Writer = XmlWriter.Create("test2.xml", settings);
+            XmlWriter Writer = XmlWriter.Create(xmlPath, settings);
 
             Writer.WriteStartDocument();
 
@@ -217,6 +217,7 @@ namespace TridniKnihovna
                 if (hasInitialState == true)
                 {
                     NewStates[GroupRecorder[group.Key].ElementAt(0)].IsInitial = true;
+                    InitialStateId = NewStates[GroupRecorder[group.Key].ElementAt(0)].Id;
                 }
             }
 

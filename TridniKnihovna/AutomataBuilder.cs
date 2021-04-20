@@ -73,26 +73,9 @@ namespace TridniKnihovna
                 }
             }
 
-            //State end = new State(stateCounter + 1, "q" + (stateCounter + 1), false, true);
-            //states.Add(end);
-
             foreach (int id in endingStatesIds)
             {
-
                 states.Find(x => x.Id == id).IsAccept = true;
-                /*if (Epsilons.TryGetValue(id, out List<int> value))
-                {
-                    if (!value.Contains(end.Id))
-                    {
-                        value.Add(end.Id);
-                    }
-                }
-                else
-                {
-                    value = new List<int>();
-                    value.Add(end.Id);
-                    Epsilons.Add(id, value);
-                }*/
             }
 
             return new NondeterministicFiniteAutomaton(states, Alphabet, triplets, Epsilons);
